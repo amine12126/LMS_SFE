@@ -1,0 +1,240 @@
+.tlg-page {
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+  font-family: var(--font-body, "Inter", sans-serif);
+}
+
+.tlg-header {
+  margin-bottom: 32px;
+}
+
+.tlg-title {
+  font-family: var(--font-display, "Playfair Display", serif);
+  font-size: 2.5rem;
+  color: var(--ink, #1a1410);
+  margin: 0 0 12px;
+}
+
+.tlg-desc {
+  color: var(--ink-2, #4a3f35);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.tlg-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+  .tlg-layout {
+    flex-direction: column-reverse;
+  }
+}
+
+/* LISTE DES GROUPES */
+.tlg-list-section {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--border-c, rgba(26, 20, 16, 0.1));
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0,0,0,0.03));
+  padding: 32px;
+  min-width: 300px;
+}
+
+.tlg-section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink, #1a1410);
+  margin: 0 0 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--cream-2, #f3ede3);
+}
+
+.tlg-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tlg-group-card {
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--cream, #faf7f2);
+  border: 1px solid var(--cream-2, #f3ede3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tlg-group-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 20, 16, 0.05);
+}
+
+.tlg-group-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink, #1a1410);
+  margin: 0 0 8px;
+}
+
+.tlg-group-count {
+  font-size: 0.9rem;
+  color: var(--ink-3, #7a6e65);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* FORMULAIRE DE CRÉATION */
+.tlg-form-section {
+  flex: 2;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--border-c, rgba(26, 20, 16, 0.1));
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.06));
+  padding: 32px;
+}
+
+.tlg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tlg-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink-2, #4a3f35);
+  text-transform: uppercase;
+}
+
+.tlg-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-c, rgba(26, 20, 16, 0.15));
+  font-size: 1rem;
+  outline: none;
+  background: var(--cream, #faf7f2);
+  transition: all 0.2s;
+}
+
+.tlg-input:focus {
+  background: #fff;
+  border-color: var(--terra, #c4602a);
+  box-shadow: 0 0 0 3px rgba(196, 96, 42, 0.1);
+}
+
+.tlg-search-wrap {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.tlg-consultants-list {
+  border: 1px solid var(--border-c, rgba(26, 20, 16, 0.15));
+  border-radius: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--cream, #faf7f2);
+}
+
+.tlg-consultant-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-c, rgba(26, 20, 16, 0.05));
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tlg-consultant-item:last-child {
+  border-bottom: none;
+}
+
+.tlg-consultant-item:hover {
+  background: #fff;
+}
+
+.tlg-consultant-item--selected {
+  background: var(--terra-dim, rgba(196, 96, 42, 0.08));
+}
+
+.tlg-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--terra, #c4602a);
+}
+
+.tlg-cons-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.tlg-cons-name {
+  font-weight: 700;
+  color: var(--ink, #1a1410);
+  font-size: 0.95rem;
+}
+
+.tlg-cons-email {
+  font-size: 0.8rem;
+  color: var(--ink-3, #7a6e65);
+}
+
+.tlg-selection-summary {
+  margin-top: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--terra, #c4602a);
+}
+
+.tlg-btn-submit {
+  margin-top: 32px;
+  width: 100%;
+  padding: 16px;
+  background: var(--terra, #c4602a);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tlg-btn-submit:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(196, 96, 42, 0.3);
+}
+
+.tlg-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tlg-alert {
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.tlg-alert--success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #6ee7b7;
+}
+
+.tlg-alert--error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}

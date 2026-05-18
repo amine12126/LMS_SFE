@@ -1,0 +1,33 @@
+.add-course-card {
+  min-height: 200px;
+  border-radius: 16px;
+  border: 1px dashed var(--border-hover);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  color: var(--text-1);
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  padding: 18px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.add-course-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: var(--accent-glow);
+}
+
+.add-course-card__icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.add-course-card__label {
+  font-weight: 700;
+}
+

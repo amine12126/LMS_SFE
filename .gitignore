@@ -1,0 +1,63 @@
+# =========================
+# Environnements Virtuels
+# =========================
+venv/
+env/
+.venv/
+.env/
+
+# =========================
+# Variables d'Environnement et Secrets
+# =========================
+.env
+.env.local
+.env.*
+
+# =========================
+# Backend Django (Python)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+db.sqlite3
+*.log
+pip_install_*.log
+
+# =========================
+# Frontend React (Node)
+# =========================
+frontend/node_modules/
+node_modules/
+frontend/build/
+build/
+dist/
+.npm/
+.eslintcache
+
+# =========================
+# Fichiers Temporaires (dlib, logs, OS)
+# =========================
+dlib_tmp/
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+
+# =========================
+# Configuration IDE (VSCode, etc.)
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Fichiers médias / uploads
+# =========================
+media/
+
+# =========================
+# Dossiers temporaires
+# =========================
+EX222222/

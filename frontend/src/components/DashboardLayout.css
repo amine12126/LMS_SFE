@@ -1,0 +1,13 @@
+.layout {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.layout__hero {
+  padding: 22px 22px 0;
+}
+
+.layout__main {
+  padding: 22px;
+}
+

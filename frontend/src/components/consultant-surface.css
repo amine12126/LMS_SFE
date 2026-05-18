@@ -1,0 +1,100 @@
+/* Thème « terra / cream » — uniquement sous l’espace consultant */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
+
+.layout__main--consultant {
+  --cream: #faf7f2;
+  --cream-2: #f3ede3;
+  --cream-3: #ede5d8;
+  --parchment: #e8dece;
+  --ink: #1a1410;
+  --ink-2: #4a3f35;
+  --ink-3: #7a6e65;
+  --ink-4: #b0a49a;
+  --terra: #c4602a;
+  --terra-dim: rgba(196, 96, 42, 0.1);
+  --terra-glow: 0 0 28px rgba(196, 96, 42, 0.2);
+  --moss: #4a6741;
+  --sky-warm: #4a7fa5;
+  --border-c: rgba(26, 20, 16, 0.1);
+  --border-c2: rgba(26, 20, 16, 0.06);
+  --shadow-sm: 0 2px 8px rgba(26, 20, 16, 0.08);
+  --shadow-md: 0 8px 32px rgba(26, 20, 16, 0.12);
+  --shadow-lg: 0 20px 60px rgba(26, 20, 16, 0.16);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  min-height: calc(100vh - 72px);
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+.layout__main--consultant .page-enter {
+  animation: consultant-page-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes consultant-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.layout__main--consultant .error-banner {
+  background: rgba(196, 96, 42, 0.08);
+  border: 1px solid rgba(196, 96, 42, 0.25);
+  color: var(--terra);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  margin-bottom: 20px;
+}
+
+.layout__main--consultant .spinner-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.layout__main--consultant .spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--cream-3);
+  border-top-color: var(--terra);
+  border-radius: 50%;
+  animation: consultant-spin 0.75s linear infinite;
+}
+
+@keyframes consultant-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.layout__main--consultant .skeleton {
+  background: linear-gradient(90deg, var(--cream-2) 25%, var(--cream-3) 50%, var(--cream-2) 75%);
+  background-size: 200% 100%;
+  animation: consultant-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes consultant-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}

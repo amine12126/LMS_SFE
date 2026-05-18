@@ -1,0 +1,205 @@
+:root {
+  --terra: #e07a5f;
+  --terra-light: #f4a261;
+  --terra-dim: #f4f1de;
+  --leaf: #81b29a;
+  --night: #3d405b;
+  --sand: #f2cc8f;
+  --cream: #f9f8f1;
+  --ink: #2b2d42;
+  --white: #ffffff;
+  --grad: linear-gradient(135deg, #3d405b 0%, #2b2d42 100%);
+  --shadow-lg: 0 15px 35px rgba(0, 0, 0, 0.05);
+}
+
+.admp-page {
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.admp-header {
+  margin-bottom: 40px;
+}
+
+.admp-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--night);
+  margin-bottom: 8px;
+}
+
+.admp-desc {
+  color: var(--ink-3);
+  font-size: 1.1rem;
+}
+
+.admp-card {
+  background: white;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid #f1f5f9;
+  margin-bottom: 32px;
+}
+
+.admp-section-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--night);
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f8fafc;
+}
+
+/* PHOTO SECTION */
+.admp-photo-row {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.admp-avatar-wrap {
+  width: 120px;
+  height: 120px;
+  border-radius: 30px;
+  overflow: hidden;
+  background: var(--night);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.admp-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admp-avatar--placeholder {
+  color: white;
+  font-size: 3rem;
+  font-weight: 900;
+}
+
+.admp-photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admp-btn-photo {
+  padding: 10px 20px;
+  background: var(--terra-dim);
+  color: var(--terra);
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--terra);
+  transition: all 0.3s;
+  display: inline-block;
+  text-align: center;
+}
+
+.admp-btn-photo:hover {
+  background: var(--terra);
+  color: white;
+}
+
+.admp-file-input {
+  display: none;
+}
+
+/* FORM GRID */
+.admp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.admp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admp-field--full {
+  grid-column: 1 / -1;
+}
+
+.admp-field label {
+  font-weight: 700;
+  color: var(--night);
+  font-size: 0.9rem;
+}
+
+.admp-field input {
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.admp-field input:focus {
+  border-color: var(--terra);
+  outline: none;
+  box-shadow: 0 0 0 4px var(--terra-dim);
+}
+
+.admp-field input:disabled {
+  background: #f8fafc;
+  cursor: not-allowed;
+}
+
+.admp-btn-save {
+  margin-top: 32px;
+  padding: 16px 32px;
+  background: var(--night);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: fit-content;
+}
+
+.admp-btn-save:hover {
+  background: var(--terra);
+  transform: translateY(-2px);
+}
+
+.admp-btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* NOTIFICATIONS */
+.admp-msg {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.admp-msg--error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fee2e2;
+}
+
+.admp-msg--success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #dcfce7;
+}

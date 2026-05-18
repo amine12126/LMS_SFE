@@ -1,0 +1,120 @@
+.chapter-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chapter-list__empty {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--ink-3, #7a6e65);
+  font-size: 0.9rem;
+}
+
+.chapter-list__empty span {
+  font-size: 1.75rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.chapter-list__item {
+  border-radius: var(--radius-sm, 10px);
+  border: 1px solid var(--border-c2, rgba(26, 20, 16, 0.06));
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.chapter-list__item--active {
+  border-color: var(--terra, #c4602a);
+  box-shadow: 0 0 0 3px var(--terra-dim, rgba(196, 96, 42, 0.12));
+}
+
+.chapter-list__btn {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body, sans-serif);
+  box-sizing: border-box;
+}
+
+.chapter-list__btn:hover {
+  background: var(--cream, #faf7f2);
+}
+
+.chapter-list__num {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--terra, #c4602a);
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+}
+
+.chapter-list__title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--ink, #1a1410);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.chapter-list__arrow {
+  color: var(--ink-4, #b0a49a);
+  flex-shrink: 0;
+}
+
+.chapter-list__item--active .chapter-list__arrow {
+  color: var(--terra, #c4602a);
+}
+
+.chapter-list__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 12px;
+}
+
+.chapter-list__pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--cream-2, #f3ede3);
+  color: var(--ink-2, #4a3f35);
+}
+
+.chapter-list__pill--pdf {
+  background: rgba(196, 96, 42, 0.12);
+  color: var(--terra, #c4602a);
+}
+.chapter-list__pill--video {
+  background: rgba(74, 127, 165, 0.15);
+  color: var(--sky-warm, #4a7fa5);
+}
+.chapter-list__pill--image {
+  background: rgba(74, 103, 65, 0.15);
+  color: var(--moss, #4a6741);
+}
+.chapter-list__pill--link {
+  background: rgba(26, 20, 16, 0.06);
+  color: var(--ink-3, #7a6e65);
+}

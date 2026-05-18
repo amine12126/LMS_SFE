@@ -1,0 +1,107 @@
+.teacher-card {
+  background: #fff;
+  border: 1px solid var(--border-c, rgba(26, 20, 16, 0.1));
+  border-radius: var(--radius, 16px);
+  padding: 22px;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(26, 20, 16, 0.08));
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.teacher-card__header {
+  margin-bottom: 18px;
+}
+
+.teacher-card__eyebrow {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--terra, #c4602a);
+  margin: 0 0 6px;
+}
+
+.teacher-card__name {
+  font-family: var(--font-display, "Playfair Display", serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink, #1a1410);
+  line-height: 1.25;
+}
+
+.teacher-card__profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.teacher-card__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.teacher-card__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--cream-3, #ede5d8);
+}
+
+.teacher-card__status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: var(--moss, #4a6741);
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+
+.teacher-card__role {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-3, #7a6e65);
+  margin: 0 0 4px;
+}
+
+.teacher-card__email {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-2, #4a3f35);
+  margin: 0;
+  word-break: break-all;
+}
+
+.teacher-card__bio {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ink-2, #4a3f35);
+  margin: 0 0 16px;
+}
+
+.teacher-card__divider {
+  height: 1px;
+  background: var(--border-c2, rgba(26, 20, 16, 0.06));
+  margin: 16px 0;
+}
+
+.teacher-card__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-3, #7a6e65);
+  margin: 0;
+}
+
+.teacher-card__note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
