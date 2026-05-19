@@ -70,6 +70,19 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+# CSRF Trusted Origins for production HTTPS requests
+raw_csrf = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
+if raw_csrf:
+    CSRF_TRUSTED_ORIGINS = raw_csrf.split(',')
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://lmssfe-production.up.railway.app",
+        "https://*.railway.app",
+        "https://*.up.railway.app",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
