@@ -19,13 +19,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+import os
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-n@-&4on698#%%&cv1r))qve9@_$j7mn9&ub&h@g5(4j!ho!qsl'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-n@-&4on698#%%&cv1r))qve9@_$j7mn9&ub&h@g5(4j!ho!qsl')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+# Dynamic host configuration
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 # Frontend URL (used in password reset emails)
 FRONTEND_URL = "http://localhost:3000"
