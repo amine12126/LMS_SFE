@@ -25,8 +25,13 @@ export default function CreateCourse() {
   const handleChange = (e) => {
     if (e.target.name === "image") {
       const file = e.target.files[0];
-      setForm({ ...form, image: file });
-      setPreview(URL.createObjectURL(file));
+      if (file) {
+        setForm({ ...form, image: file });
+        setPreview(URL.createObjectURL(file));
+      } else {
+        setForm({ ...form, image: null });
+        setPreview(null);
+      }
     } else if (e.target.name === "is_mandatory") {
       setForm({ ...form, is_mandatory: e.target.checked });
     } else {
@@ -40,7 +45,15 @@ export default function CreateCourse() {
     setSaving(true);
 
     const data = new FormData();
-    Object.entries(form).forEach(([k, v]) => data.append(k, v));
+    Object.entries(form).forEach(([k, v]) => {
+      if (k === "image") {
+        if (v) {
+          data.append(k, v);
+        }
+      } else {
+        data.append(k, v);
+      }
+    });
     
     if (groupId) {
       data.append("group_id", groupId);
