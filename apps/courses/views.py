@@ -33,23 +33,28 @@ class CourseListCreateView(generics.ListCreateAPIView):
         return Course.objects.filter(created_by=self.request.user, is_deleted=False)
 
     def perform_create(self, serializer):
-        group_id = self.request.data.get("group_id")
-        
-        # S'il y a un group_id, le cours devient privé, sinon il est public par défaut
-        is_public = False if group_id else True
-        
-        obj = serializer.save(created_by=self.request.user, is_public=is_public)
-        
-        if group_id:
-            try:
-                group = CourseGroup.objects.get(
-                    Q(pk=group_id) & (Q(created_by=self.request.user) | Q(team_leaders=self.request.user))
-                )
-                obj.groups.add(group)
-            except ObjectDoesNotExist:
-                pass
+        import traceback
+        try:
+            group_id = self.request.data.get("group_id")
+            
+            # S'il y a un group_id, le cours devient privé, sinon il est public par défaut
+            is_public = False if group_id else True
+            
+            obj = serializer.save(created_by=self.request.user, is_public=is_public)
+            
+            if group_id:
+                try:
+                    group = CourseGroup.objects.get(
+                        Q(pk=group_id) & (Q(created_by=self.request.user) | Q(team_leaders=self.request.user))
+                    )
+                    obj.groups.add(group)
+                except ObjectDoesNotExist:
+                    pass
 
-        log_action(self.request.user, "CREATE", obj)
+            log_action(self.request.user, "CREATE", obj)
+        except Exception as e:
+            traceback.print_exc()
+            raise e
 
 
 class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
