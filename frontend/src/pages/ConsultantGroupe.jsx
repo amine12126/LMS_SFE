@@ -2,13 +2,67 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { consultantCourseService } from "../services/api.js";
 import FaceVerificationModal from "../components/FaceVerification/FaceVerificationModal";
+import { useAuth } from "../auth/AuthContext";
+import API from "../api/axios";
 import "./ConsultantGroupe.css";
+
+// 💡 Pour réactiver Face ID, mets cette constante à true.
+const USE_FACE_ID = false;
+
+const PasswordVerificationModal = ({ onSuccess, onClose }) => {
+  const { user } = useAuth();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      await API.post("auth/login/", { email: user.email, password });
+      onSuccess();
+    } catch (err) {
+      setError("Mot de passe incorrect.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+      <div style={{ background: "#fff", padding: "30px", borderRadius: "12px", width: "100%", maxWidth: "400px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}>
+        <h2 style={{ marginBottom: "15px", color: "#1a1410", fontSize: "1.4rem" }}>🔐 Sécurité du Groupe</h2>
+        <p style={{ marginBottom: "20px", color: "#64748b", fontSize: "0.95rem" }}>Veuillez confirmer votre mot de passe pour accéder aux contenus confidentiels de ce groupe.</p>
+        
+        {error && <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px", borderRadius: "6px", marginBottom: "16px", fontSize: "0.9rem" }}>{error}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <input 
+            type="password" 
+            placeholder="Votre mot de passe" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ width: "100%", padding: "12px", border: "1px solid #cbd5e1", borderRadius: "8px", marginBottom: "20px", fontSize: "16px" }}
+            autoFocus
+          />
+          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+            <button type="button" onClick={onClose} style={{ padding: "10px 16px", background: "transparent", border: "none", color: "#64748b", cursor: "pointer", fontWeight: "600" }}>Annuler</button>
+            <button type="submit" disabled={loading} style={{ padding: "10px 16px", background: "#3b9eff", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "600" }}>
+              {loading ? "Vérification..." : "Déverrouiller"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 function ConsultantGroupe() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Nouveaux états pour la reconnaissance faciale
+  // Nouveaux états pour la reconnaissance faciale (ou mot de passe)
   const [unlockedGroups, setUnlockedGroups] = useState({});
   const [selectedGroupToUnlock, setSelectedGroupToUnlock] = useState(null);
 
@@ -62,7 +116,9 @@ function ConsultantGroupe() {
 
               {!isUnlocked ? (
                 <div style={{ textAlign: "center", padding: "30px", background: "var(--surface-color, rgba(255,255,255,0.05))", borderRadius: "12px", marginTop: "16px", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <p style={{ marginBottom: "16px", color: "var(--ink-2, #ccc)", fontSize: "15px" }}>Ce groupe est sécurisé. Vous devez vérifier votre identité avec votre visage pour y accéder.</p>
+                  <p style={{ marginBottom: "16px", color: "var(--ink-2, #ccc)", fontSize: "15px" }}>
+                    Ce groupe est sécurisé. Vous devez vérifier votre identité pour y accéder.
+                  </p>
                   <button 
                     onClick={() => setSelectedGroupToUnlock(group.id)}
                     style={{ padding: "12px 24px", background: "#3b9eff", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "600", fontSize: "14px", display: "inline-flex", alignItems: "center", gap: "8px" }}
@@ -102,11 +158,18 @@ function ConsultantGroupe() {
       )}
 
       {selectedGroupToUnlock && (
-        <FaceVerificationModal 
-          groupId={selectedGroupToUnlock} 
-          onSuccess={handleUnlockSuccess} 
-          onClose={() => setSelectedGroupToUnlock(null)} 
-        />
+        USE_FACE_ID ? (
+          <FaceVerificationModal 
+            groupId={selectedGroupToUnlock} 
+            onSuccess={handleUnlockSuccess} 
+            onClose={() => setSelectedGroupToUnlock(null)} 
+          />
+        ) : (
+          <PasswordVerificationModal 
+            onSuccess={handleUnlockSuccess} 
+            onClose={() => setSelectedGroupToUnlock(null)} 
+          />
+        )
       )}
     </div>
   );
