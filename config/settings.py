@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'cloudinary',
     'corsheaders',
     'rest_framework',        # Pour l'API
-    'drf_yasg',              # Pour la documentation Swagger
     'apps.authentication',   # Votre dossier d'authentification
     'apps.courses',          # Votre dossier de cours
     'apps.users',            # Profil / users endpoints (si utilisé)
@@ -191,7 +190,9 @@ else:
         },
     }
 
-# Staticfiles finders : inclure les répertoires des apps (admin, drf_yasg, etc.)
+# Requis par cloudinary_storage (vérifie settings.STATICFILES_STORAGE)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
