@@ -168,9 +168,7 @@ if os.environ.get('CLOUDINARY_CLOUD_NAME'):
             "BACKEND": "config.storage.FlexibleCloudinaryStorage",
         },
         "staticfiles": {
-            # CompressedStaticFilesStorage : compresse les fichiers sans vérifier
-            # les références croisées entre CSS (évite MissingFileError sur Railway)
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
     CLOUDINARY_STORAGE = {
@@ -184,14 +182,12 @@ else:
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
         "staticfiles": {
-            # CompressedStaticFilesStorage : compresse les fichiers sans vérifier
-            # les références croisées entre CSS (évite MissingFileError sur Railway)
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
 
 # Requis par cloudinary_storage (vérifie settings.STATICFILES_STORAGE)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
