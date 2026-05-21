@@ -69,9 +69,13 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://lms-sfe-git-master-amine-s-projects9z.vercel.app",
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
 ]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # CSRF Trusted Origins for production HTTPS requests
 raw_csrf = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
@@ -82,6 +86,8 @@ else:
         "https://lmssfe-production.up.railway.app",
         "https://*.railway.app",
         "https://*.up.railway.app",
+        "https://*.vercel.app",
+        "https://lms-sfe-git-master-amine-s-projects9z.vercel.app",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
