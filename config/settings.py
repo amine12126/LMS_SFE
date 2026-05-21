@@ -217,6 +217,10 @@ REST_FRAMEWORK = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Taille max des fichiers uploadés (PDF, vidéos) — 100 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600       # 100 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600       # 100 MB
+
 from datetime import timedelta
 
 SIMPLE_JWT = {
