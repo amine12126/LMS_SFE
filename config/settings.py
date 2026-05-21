@@ -155,17 +155,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Django 6.x compatibility fix for django-cloudinary-storage collectstatic command
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-
 if os.environ.get('CLOUDINARY_CLOUD_NAME'):
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
     CLOUDINARY_STORAGE = {
@@ -179,9 +175,12 @@ else:
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 
 
 AUTH_USER_MODEL = "authentication.User"
