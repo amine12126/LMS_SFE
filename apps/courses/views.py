@@ -260,8 +260,10 @@ class MarkChapterProgressView(APIView):
 
     def post(self, request, pk):
         action = request.data.get("action")
-        if action not in ["view", "complete"]:
-            raise ValidationError("Action must be 'view' or 'complete'")
+        print("DEBUG POST PROGRESS: action =", action, "data =", request.data)
+        if action not in ["view", "complete", "reset"]:
+            print("DEBUG POST PROGRESS: invalid action!")
+            raise ValidationError(f"Action must be 'view', 'complete' or 'reset'. Got: {action}")
             
         chapter = generics.get_object_or_404(Chapter, pk=pk)
         progress, _ = ChapterProgress.objects.get_or_create(user=request.user, chapter=chapter)
@@ -270,6 +272,12 @@ class MarkChapterProgressView(APIView):
             progress.mark_viewed()
         elif action == "complete":
             progress.mark_completed()
+        elif action == "reset":
+            progress.is_completed = False
+            progress.completed_at = None
+            progress.save()
+            # Reset all contents progress for this chapter
+            ContentProgress.objects.filter(user=request.user, content__chapter=chapter).delete()
             
         return Response({
             "status": "ok", 

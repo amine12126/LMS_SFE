@@ -34,6 +34,21 @@ const ChapterViewer = ({ chapter, index, onProgressUpdate }) => {
     return set;
   });
 
+  const handleReset = () => {
+    if (window.confirm("Voulez-vous vraiment annuler la progression de ce chapitre ? Vous devrez revoir tous ses contenus.")) {
+      setSaving(true);
+      consultantCourseService.markProgress(chapter.id, "reset").then(res => {
+        setIsCompleted(false);
+        setCompletedItems(new Set());
+        if (onProgressUpdate) onProgressUpdate(chapter.id, res.data);
+      }).catch(err => {
+        console.error("DEBUG ERROR FROM BACKEND:", err.response?.data || err);
+        alert("Erreur: " + JSON.stringify(err.response?.data || err.message));
+      })
+      .finally(() => setSaving(false));
+    }
+  };
+
   const handleContentComplete = (contentId) => {
     consultantCourseService.markContentProgress(contentId).then(() => {
       setCompletedItems(prev => {
@@ -47,8 +62,8 @@ const ChapterViewer = ({ chapter, index, onProgressUpdate }) => {
     }).catch(console.error);
   };
 
+  // Synchronize state with new chapter prop data from server
   useEffect(() => {
-    setPreviewContent(null);
     if (chapter) {
       setIsCompleted(chapter.progress?.is_completed || false);
       const set = new Set();
@@ -58,7 +73,13 @@ const ChapterViewer = ({ chapter, index, onProgressUpdate }) => {
         });
       }
       setCompletedItems(set);
-      // Mark as viewed
+    }
+  }, [chapter]);
+
+  // Mark as viewed and notify parent ONLY when chapter ID actually changes
+  useEffect(() => {
+    setPreviewContent(null);
+    if (chapter?.id) {
       consultantCourseService.markProgress(chapter.id, "view").then(res => {
         if (onProgressUpdate) {
            onProgressUpdate(chapter.id, res.data);
@@ -129,8 +150,8 @@ const ChapterViewer = ({ chapter, index, onProgressUpdate }) => {
                type="checkbox" 
                id={`chapter-complete-${chapter.id}`}
                checked={isCompleted}
-               disabled={saving || isCompleted || !canComplete}
-               style={{ width: 20, height: 20, cursor: (isCompleted || !canComplete) ? "default" : "pointer", opacity: canComplete ? 1 : 0.5 }}
+               disabled={saving || (!isCompleted && !canComplete)}
+               style={{ width: 20, height: 20, cursor: (saving || (!isCompleted && !canComplete)) ? "default" : "pointer", opacity: canComplete ? 1 : 0.5 }}
                onChange={(e) => {
                  if (e.target.checked && canComplete) {
                    setSaving(true);
@@ -138,10 +159,12 @@ const ChapterViewer = ({ chapter, index, onProgressUpdate }) => {
                      setIsCompleted(true);
                      if (onProgressUpdate) onProgressUpdate(chapter.id, res.data);
                    }).finally(() => setSaving(false));
+                 } else if (!e.target.checked) {
+                   handleReset();
                  }
                }}
              />
-             <label htmlFor={`chapter-complete-${chapter.id}`} style={{ fontWeight: 600, color: isCompleted ? "var(--moss, #4a6741)" : (canComplete ? "var(--ink, #1a1410)" : "#94a3b8"), cursor: (isCompleted || !canComplete) ? "default" : "pointer" }}>
+             <label htmlFor={`chapter-complete-${chapter.id}`} style={{ fontWeight: 600, color: isCompleted ? "var(--moss, #4a6741)" : (canComplete ? "var(--ink, #1a1410)" : "#94a3b8"), cursor: (saving || (!isCompleted && !canComplete)) ? "default" : "pointer" }}>
                {isCompleted ? "✔ Chapitre terminé" : "Marquer ce chapitre comme terminé"}
              </label>
              {!isCompleted && !canComplete && (

@@ -35,17 +35,31 @@ const CourseDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    setLoading(true);
+  const fetchCourseData = (showLoading = true) => {
+    if (showLoading) setLoading(true);
     consultantCourseService
       .getOne(id)
       .then(({ data }) => {
         setCourse(data);
-        setSelectedChapter(null);
-        setSelectedIndex(null);
+        if (selectedChapter) {
+          const updatedCh = data.chapters?.find(ch => ch.id === selectedChapter.id);
+          if (updatedCh) {
+            setSelectedChapter(updatedCh);
+          }
+        }
       })
       .catch(() => setError("Impossible de charger ce cours."))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (showLoading) setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchCourseData(true);
+    // Reset selected chapter when changing course
+    setSelectedChapter(null);
+    setSelectedIndex(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleSelectChapter = (chapter) => {
@@ -136,7 +150,7 @@ const CourseDetailPage = () => {
 
                   {selectedChapter ? (
                     <section className="cdp-viewer-section">
-                      <ChapterViewer chapter={selectedChapter} index={selectedIndex} />
+                      <ChapterViewer chapter={selectedChapter} index={selectedIndex} onProgressUpdate={() => fetchCourseData(false)} />
                     </section>
                   ) : null}
                 </div>
