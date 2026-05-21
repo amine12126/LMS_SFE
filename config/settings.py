@@ -169,7 +169,9 @@ if os.environ.get('CLOUDINARY_CLOUD_NAME'):
             "BACKEND": "config.storage.FlexibleCloudinaryStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            # CompressedStaticFilesStorage : compresse les fichiers sans vérifier
+            # les références croisées entre CSS (évite MissingFileError sur Railway)
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
     CLOUDINARY_STORAGE = {
@@ -183,11 +185,17 @@ else:
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            # CompressedStaticFilesStorage : compresse les fichiers sans vérifier
+            # les références croisées entre CSS (évite MissingFileError sur Railway)
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Staticfiles finders : inclure les répertoires des apps (admin, drf_yasg, etc.)
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 
 
