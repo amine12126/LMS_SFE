@@ -53,7 +53,7 @@ function AuthPage() {
         return;
       }
 
-      login(res.data);
+      login({ ...res.data, email: loginForm.email });
 
       // 🔥 REDIRECTION حسب ROLE
       if (res.data.role === "admin") navigate("/admin");

@@ -11,16 +11,33 @@ const USE_FACE_ID = false;
 
 const PasswordVerificationModal = ({ onSuccess, onClose }) => {
   const { user } = useAuth();
+  const [email, setEmail] = useState(user?.email || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!email) {
+      API.get("auth/profile/")
+        .then(res => {
+          if (res.data?.email) {
+            setEmail(res.data.email);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [email]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email) {
+      setError("Impossible de récupérer l'adresse email.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
-      await API.post("auth/login/", { email: user.email, password });
+      await API.post("auth/login/", { email, password });
       onSuccess();
     } catch (err) {
       setError("Mot de passe incorrect.");
@@ -61,8 +78,8 @@ const PasswordVerificationModal = ({ onSuccess, onClose }) => {
 function ConsultantGroupe() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Nouveaux états pour la reconnaissance faciale (ou mot de passe)
+
+  // Nouveaux états pour la reconnaissance faciale
   const [unlockedGroups, setUnlockedGroups] = useState({});
   const [selectedGroupToUnlock, setSelectedGroupToUnlock] = useState(null);
 
@@ -116,10 +133,8 @@ function ConsultantGroupe() {
 
               {!isUnlocked ? (
                 <div style={{ textAlign: "center", padding: "30px", background: "var(--surface-color, rgba(255,255,255,0.05))", borderRadius: "12px", marginTop: "16px", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <p style={{ marginBottom: "16px", color: "var(--ink-2, #ccc)", fontSize: "15px" }}>
-                    Ce groupe est sécurisé. Vous devez vérifier votre identité pour y accéder.
-                  </p>
-                  <button 
+                  <p style={{ marginBottom: "16px", color: "var(--ink-2, #ccc)", fontSize: "15px" }}>Ce groupe est sécurisé. Vous devez vérifier votre identité avec votre visage pour y accéder.</p>
+                  <button
                     onClick={() => setSelectedGroupToUnlock(group.id)}
                     style={{ padding: "12px 24px", background: "#3b9eff", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "600", fontSize: "14px", display: "inline-flex", alignItems: "center", gap: "8px" }}
                   >
@@ -135,13 +150,13 @@ function ConsultantGroupe() {
                       <div key={course.id} className="cg-course-card">
                         <h3 className="cg-course-title">{course.title}</h3>
                         <p className="cg-course-desc">{course.description || "Aucune description disponible pour ce cours."}</p>
-                        
+
                         <div className="cg-course-meta">
                           <span>⏱️ {course.duration || "Non spécifiée"}</span>
                           <span>📑 {course.chapters_count} chapitres</span>
                         </div>
-                        
-                        <button 
+
+                        <button
                           className="cg-btn-open"
                           onClick={() => navigate(`/consultant/courses/${course.id}`)}
                         >
