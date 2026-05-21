@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'corsheaders',
     'rest_framework',        # Pour l'API
+    'drf_yasg',              # Pour la documentation Swagger
     'apps.authentication',   # Votre dossier d'authentification
     'apps.courses',          # Votre dossier de cours
     'apps.users',            # Profil / users endpoints (si utilisé)
