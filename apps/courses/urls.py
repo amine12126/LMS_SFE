@@ -30,6 +30,7 @@ urlpatterns = [
     # STATS
     path("stats/", TLStatsView.as_view()),
     path("consultant-stats/", ConsultantStatsView.as_view()),
+    path("stats/<str:ggid>/", ConsultantStatsByGGIDView.as_view()),
     path("admin-stats/", AdminStatsView.as_view()),
     
     # CONSULTANT GROUPS

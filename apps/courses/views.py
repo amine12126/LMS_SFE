@@ -470,6 +470,77 @@ class ConsultantStatsView(APIView):
         })
 
 
+class ConsultantStatsByGGIDView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminOrTL]
+
+    def get(self, request, ggid):
+        user = generics.get_object_or_404(User, ggid=ggid, role="consultant")
+        
+        progresses = ChapterProgress.objects.filter(user=user).select_related('chapter', 'chapter__course')
+        
+        course_ids = progresses.values_list('chapter__course_id', flat=True).distinct()
+        courses = Course.objects.filter(id__in=course_ids, is_deleted=False)
+        
+        total_courses = courses.count()
+        total_viewed_chapters = progresses.filter(is_viewed=True).count()
+        total_completed_chapters = progresses.filter(is_completed=True).count()
+        
+        courses_data = []
+        completed_courses_count = 0
+        
+        for course in courses:
+            total_chapters = course.chapters.count()
+            total_contents = Content.objects.filter(chapter__course=course).count()
+            course_progress = progresses.filter(chapter__course=course)
+            
+            if total_contents > 0:
+                completed_contents = ContentProgress.objects.filter(user=user, content__chapter__course=course, is_completed=True).count()
+                prog_pct = int((completed_contents / total_contents) * 100)
+            else:
+                completed_count = course_progress.filter(is_completed=True).count()
+                prog_pct = int((completed_count / total_chapters) * 100) if total_chapters > 0 else 0
+                
+            if prog_pct == 100:
+                completed_courses_count += 1
+                
+            last_p = course_progress.order_by('-viewed_at').first()
+            
+            chapters_data = []
+            for ch in course.chapters.all():
+                ch_p = course_progress.filter(chapter=ch).first()
+                chapters_data.append({
+                    "id": ch.id,
+                    "title": ch.title,
+                    "completed": ch_p.is_completed if ch_p else False
+                })
+            
+            courses_data.append({
+                "id": course.id,
+                "title": course.title,
+                "progress": prog_pct,
+                "chapters_total": total_chapters,
+                "chapters_completed": course_progress.filter(is_completed=True).count(),
+                "last_activity": last_p.viewed_at if last_p else None,
+                "chapters_status": chapters_data
+            })
+            
+        return Response({
+            "user": {
+                "ggid": user.ggid,
+                "nom": user.nom,
+                "prenom": user.prenom
+            },
+            "kpis": {
+                "total_courses": total_courses,
+                "completed_courses": completed_courses_count,
+                "total_chapters_viewed": total_viewed_chapters,
+                "total_chapters_completed": total_completed_chapters
+            },
+            "courses": courses_data
+        })
+
+
+
 # ─────────────────────────────
 # 🏢 MES GROUPES (CONSULTANT)
 # ─────────────────────────────
