@@ -519,51 +519,111 @@ class TLStatsView(APIView):
 class ConsultantStatsView(APIView):
     permission_classes = [IsAuthenticated, IsConsultant]
 
+    def _course_stats(self, course, user, progresses):
+        """Helper: compute progress stats for a single course."""
+        total_chapters = course.chapters.count()
+        total_contents = Content.objects.filter(chapter__course=course).count()
+        course_progress = progresses.filter(chapter__course=course)
+
+        if total_contents > 0:
+            completed_contents = ContentProgress.objects.filter(
+                user=user, content__chapter__course=course, is_completed=True
+            ).count()
+            prog_pct = int((completed_contents / total_contents) * 100)
+        else:
+            completed_count = course_progress.filter(is_completed=True).count()
+            prog_pct = int((completed_count / total_chapters) * 100) if total_chapters > 0 else 0
+
+        last_p = course_progress.order_by('-viewed_at').first()
+        return {
+            "id": course.id,
+            "title": course.title,
+            "progress": prog_pct,
+            "chapters_total": total_chapters,
+            "chapters_completed": course_progress.filter(is_completed=True).count(),
+            "last_activity": last_p.viewed_at if last_p else None,
+            "is_complete": prog_pct == 100,
+        }
+
     def get(self, request):
         user = request.user
-        
+
         progresses = ChapterProgress.objects.filter(user=user).select_related('chapter', 'chapter__course')
-        
+
         course_ids = progresses.values_list('chapter__course_id', flat=True).distinct()
-        courses = Course.objects.filter(id__in=course_ids, is_deleted=False)
-        
-        total_courses = courses.count()
+        all_courses = Course.objects.filter(id__in=course_ids, is_deleted=False).select_related('created_by')
+
+        # Get groups + packages for this consultant
+        groups = CourseGroup.objects.filter(consultants=user).prefetch_related('courses', 'packages__courses')
+
+        group_course_ids = set()
+        group_package_course_ids = set()
+        groups_data = []
+
+        for g in groups:
+            g_courses = g.courses.filter(is_deleted=False)
+            g_course_ids = set(g_courses.values_list('id', flat=True))
+            group_course_ids.update(g_course_ids)
+
+            g_courses_stats = [
+                self._course_stats(c, user, progresses)
+                for c in g_courses
+                if c.id in course_ids
+            ]
+
+            packages_stats = []
+            for pkg in g.packages.all():
+                p_courses = pkg.courses.filter(is_deleted=False)
+                p_course_ids = set(p_courses.values_list('id', flat=True))
+                group_package_course_ids.update(p_course_ids)
+                group_course_ids.update(p_course_ids)
+
+                p_courses_stats = [
+                    self._course_stats(c, user, progresses)
+                    for c in p_courses
+                    if c.id in course_ids
+                ]
+                packages_stats.append({
+                    "id": pkg.id,
+                    "name": pkg.name,
+                    "description": pkg.description,
+                    "courses": p_courses_stats,
+                })
+
+            groups_data.append({
+                "id": g.id,
+                "name": g.name,
+                "courses": g_courses_stats,
+                "packages": packages_stats,
+            })
+
+        # Public courses: not in any group/package
+        public_courses = [
+            self._course_stats(c, user, progresses)
+            for c in all_courses
+            if c.is_public and c.id not in group_course_ids and not c.is_mandatory
+        ]
+
+        # Mandatory courses (can be public or group, shown separately)
+        mandatory_courses = [
+            self._course_stats(c, user, progresses)
+            for c in all_courses
+            if c.is_mandatory
+        ]
+
+        # KPIs
+        total_courses = all_courses.count()
+        completed_courses_count = sum(
+            1 for c in all_courses
+            if self._course_stats(c, user, progresses)["is_complete"]
+        )
         total_viewed_chapters = progresses.filter(is_viewed=True).count()
         total_completed_chapters = progresses.filter(is_completed=True).count()
-        
-        courses_data = []
-        completed_courses_count = 0
-        
-        for course in courses:
-            total_chapters = course.chapters.count()
-            total_contents = Content.objects.filter(chapter__course=course).count()
-            course_progress = progresses.filter(chapter__course=course)
-            
-            if total_contents > 0:
-                completed_contents = ContentProgress.objects.filter(user=user, content__chapter__course=course, is_completed=True).count()
-                prog_pct = int((completed_contents / total_contents) * 100)
-            else:
-                completed_count = course_progress.filter(is_completed=True).count()
-                prog_pct = int((completed_count / total_chapters) * 100) if total_chapters > 0 else 0
-                
-            if prog_pct == 100:
-                completed_courses_count += 1
-                
-            last_p = course_progress.order_by('-viewed_at').first()
-            
-            courses_data.append({
-                "id": course.id,
-                "title": course.title,
-                "progress": prog_pct,
-                "chapters_total": total_chapters,
-                "chapters_completed": course_progress.filter(is_completed=True).count(),
-                "last_activity": last_p.viewed_at if last_p else None
-            })
-            
-        # Recent activities (Timeline)
+
+        # Timeline
         recent_views = progresses.filter(is_viewed=True, viewed_at__isnull=False).order_by('-viewed_at')[:10]
         recent_completions = progresses.filter(is_completed=True, completed_at__isnull=False).order_by('-completed_at')[:10]
-        
+
         timeline = []
         for p in recent_views:
             timeline.append({
@@ -581,11 +641,9 @@ class ConsultantStatsView(APIView):
                 "chapter": p.chapter.title,
                 "date": p.completed_at
             })
-            
-        # Sort manually by date and take top 10
         timeline.sort(key=lambda x: x["date"], reverse=True)
         timeline = timeline[:10]
-        
+
         return Response({
             "kpis": {
                 "total_courses": total_courses,
@@ -593,7 +651,9 @@ class ConsultantStatsView(APIView):
                 "total_chapters_viewed": total_viewed_chapters,
                 "total_chapters_completed": total_completed_chapters
             },
-            "courses": courses_data,
+            "public_courses": public_courses,
+            "mandatory_courses": mandatory_courses,
+            "groups": groups_data,
             "timeline": timeline
         })
 
