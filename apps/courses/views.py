@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Chapter, Content, Course, CourseGroup, ChapterProgress, ContentProgress, CoursePackage, PackageCourseExclusion
 from .permissions import IsConsultant, IsTL
@@ -143,6 +144,7 @@ class ChapterDetailView(generics.RetrieveUpdateDestroyAPIView):
 class ContentCreateView(generics.CreateAPIView):
     serializer_class = ContentSerializer
     permission_classes = [IsAuthenticated, IsTL]
+    parser_classes = [MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
         chapter = serializer.validated_data["chapter"]
