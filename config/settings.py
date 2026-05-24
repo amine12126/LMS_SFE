@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'corsheaders',
     'rest_framework',        # Pour l'API
+    'drf_spectacular',       # Documentation Swagger/OpenAPI
     'apps.authentication',   # Votre dossier d'authentification
     'apps.courses',          # Votre dossier de cours
     'apps.users',            # Profil / users endpoints (si utilisé)
@@ -212,6 +213,7 @@ REST_FRAMEWORK = {
         # 10/min provoquait des 429 dès qu’on naviguait liste ↔ détail cours (consultant/TL).
         "user": "200/minute",
     },
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 MEDIA_URL = "/media/"
@@ -239,3 +241,10 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # EMAIL_USE_TLS = True
 # EMAIL_HOST_USER = "your_email@gmail.com"
 # EMAIL_HOST_PASSWORD = "your_app_password"
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LMS SFE API Documentation',
+    'DESCRIPTION': 'API documentation for the SFE Learning Management System',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
