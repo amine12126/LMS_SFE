@@ -77,6 +77,7 @@ const PasswordVerificationModal = ({ onSuccess, onClose }) => {
 
 function ConsultantGroupe() {
   const [groups, setGroups] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   // Nouveaux états pour la reconnaissance faciale
@@ -91,6 +92,10 @@ function ConsultantGroupe() {
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
+
+  const filteredGroups = groups.filter(group =>
+    group.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -112,13 +117,48 @@ function ConsultantGroupe() {
         <p className="cg-desc">Retrouvez ici les groupes auxquels vous appartenez et les cours qui vous ont été spécifiquement assignés par votre Team Leader.</p>
       </div>
 
+      {groups.length > 0 && (
+        <div className="cg-search-container" style={{ marginBottom: "28px", position: "relative" }}>
+          <input
+            type="text"
+            placeholder="Rechercher un groupe par nom..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px 16px 12px 42px",
+              fontSize: "15px",
+              background: "rgba(255, 255, 255, 0.03)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: "12px",
+              color: "var(--ink, #fff)",
+              outline: "none",
+              transition: "all 0.2s ease"
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#3b9eff";
+              e.target.style.boxShadow = "0 0 10px rgba(59, 158, 255, 0.25)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "rgba(255, 255, 255, 0.1)";
+              e.target.style.boxShadow = "none";
+            }}
+          />
+          <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", opacity: 0.6 }}>🔍</span>
+        </div>
+      )}
+
       {groups.length === 0 ? (
         <div className="cg-empty">
           <div style={{ fontSize: "3rem", marginBottom: 16 }}>🏢</div>
           Vous n'appartenez à aucun groupe pour le moment.
         </div>
+      ) : filteredGroups.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--ink-3, #888)", fontSize: "16px", background: "rgba(255, 255, 255, 0.02)", borderRadius: "12px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+          🔍 Aucun groupe ne correspond à votre recherche "<strong>{searchQuery}</strong>".
+        </div>
       ) : (
-        groups.map(group => {
+        filteredGroups.map(group => {
           // 🔓 Désactivé temporairement : le groupe est directement déverrouillé sans mot de passe / visage
           const isUnlocked = true;
 
