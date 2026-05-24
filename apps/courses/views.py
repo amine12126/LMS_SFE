@@ -173,9 +173,25 @@ class ContentCreateView(generics.CreateAPIView):
         log_action(self.request.user, "CREATE", obj)
 
 
+@extend_schema(
+    methods=["PUT", "PATCH"],
+    request={
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'chapter': {'type': 'integer', 'description': 'ID du chapitre'},
+                'type': {'type': 'string', 'enum': ['image', 'pdf', 'video', 'link'], 'description': 'Type de contenu'},
+                'file': {'type': 'string', 'format': 'binary', 'description': 'Nouveau fichier optionnel'},
+                'url': {'type': 'string', 'description': 'Lien optionnel pour type link'},
+                'order': {'type': 'integer', 'description': 'Ordre (optionnel)'}
+            }
+        }
+    }
+)
 class ContentDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ContentSerializer
     permission_classes = [IsAuthenticated, IsTL]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         return Content.objects.filter(chapter__course__created_by=self.request.user)
