@@ -20,6 +20,7 @@ import TLGroups from "./pages/TLGroups.jsx";
 import TLStats from "./pages/TLStats.jsx";
 import CreateCourse from "./pages/CreateCourse.jsx";
 import CourseDetail from "./pages/CourseDetail.jsx";
+import TLPackageDetail from "./pages/TLPackageDetail.jsx";
 import { AuthProvider } from "./auth/AuthContext.js";
 import PrivateRoute from "./auth/PrivateRoute.js";
 import AuthPage from "./pages/AuthPage.jsx";
@@ -57,6 +58,7 @@ function App() {
           <Route path="/tl/courses" element={<PrivateRoute role="tl"><TLCourses /></PrivateRoute>} />
           <Route path="/tl/courses/create" element={<PrivateRoute role="tl"><CreateCourse /></PrivateRoute>} />
           <Route path="/tl/courses/:id" element={<PrivateRoute role="tl"><CourseDetail /></PrivateRoute>} />
+          <Route path="/tl/packages/:id" element={<PrivateRoute role="tl"><TLPackageDetail /></PrivateRoute>} />
           <Route path="/tl/groups" element={<PrivateRoute role="tl"><TLGroups /></PrivateRoute>} />
           <Route path="/tl/stats" element={<PrivateRoute role="tl"><TLStats /></PrivateRoute>} />
           <Route

@@ -236,6 +236,28 @@
   display: none;
 }
 
+.package-card__footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  position: relative;
+  z-index: 1;
+}
+
+.package-card__cta {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.package-card:hover .package-card__cta {
+  opacity: 1;
+}
+
+
 /* Add Package Card - Glowing effect */
 .add-package-card {
   background: rgba(255, 255, 255, 0.02);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { courseService, packageService } from "../services/api";
 import DashboardLayout from "../components/DashboardLayout";
 import TLCourseCard from "../components/TLCourseCard.jsx";
@@ -32,6 +33,7 @@ const CoursesHero = ({ name, courseCount, packageCount }) => (
 
 const CoursesPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -182,7 +184,13 @@ const CoursesPage = () => {
                   </button>
 
                   {packages.map((pkg, i) => (
-                    <div key={pkg.id} className="package-card" style={{ animationDelay: `${i * 50}ms` }}>
+                    <div
+                      key={pkg.id}
+                      className="package-card"
+                      style={{ animationDelay: `${i * 50}ms`, cursor: "pointer" }}
+                      onClick={() => navigate(`/tl/packages/${pkg.id}`)}
+                      title="Cliquez pour gérer ce package"
+                    >
                       <div className="package-card__header">
                         <h3 className="package-card__title">{pkg.name}</h3>
                         <span className="package-badge">{pkg.courses_info?.length || 0} cours</span>
@@ -195,6 +203,9 @@ const CoursesPage = () => {
                         {pkg.courses_info?.length > 3 && (
                           <div className="package-course-item more">+{pkg.courses_info.length - 3} autres cours...</div>
                         )}
+                      </div>
+                      <div className="package-card__footer">
+                        <span className="package-card__cta">Gérer le package →</span>
                       </div>
                     </div>
                   ))}
