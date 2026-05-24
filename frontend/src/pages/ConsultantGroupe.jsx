@@ -119,7 +119,8 @@ function ConsultantGroupe() {
         </div>
       ) : (
         groups.map(group => {
-          const isUnlocked = unlockedGroups[group.id];
+          // 🔓 Désactivé temporairement : le groupe est directement déverrouillé sans mot de passe / visage
+          const isUnlocked = true;
 
           return (
             <div key={group.id} className="cg-group-block">
