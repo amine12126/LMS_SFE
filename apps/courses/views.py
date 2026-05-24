@@ -519,19 +519,45 @@ class TLStatsView(APIView):
 class ConsultantStatsView(APIView):
     permission_classes = [IsAuthenticated, IsConsultant]
 
-    def _course_stats(self, course, user, progresses):
-        """Helper: compute progress stats for a single course."""
-        total_chapters = course.chapters.count()
-        total_contents = Content.objects.filter(chapter__course=course).count()
+    def _course_stats(self, course, user, progresses, package=None):
+        """Helper: compute progress stats for a single course.
+        Si package est fourni, applique les exclusions du package
+        pour le nombre de chapitres visibles.
+        """
         course_progress = progresses.filter(chapter__course=course)
+
+        # Chapitres visibles (avec ou sans exclusions package)
+        if package:
+            exclusion = PackageCourseExclusion.objects.filter(
+                package=package, course=course
+            ).first()
+            excluded_ch_ids = (
+                list(exclusion.excluded_chapters.values_list('id', flat=True))
+                if exclusion else []
+            )
+            visible_chapters_qs = course.chapters.exclude(id__in=excluded_ch_ids)
+        else:
+            excluded_ch_ids = []
+            visible_chapters_qs = course.chapters.all()
+
+        total_chapters = visible_chapters_qs.count()
+        total_contents = Content.objects.filter(
+            chapter__course=course
+        ).exclude(chapter__id__in=excluded_ch_ids).count()
 
         if total_contents > 0:
             completed_contents = ContentProgress.objects.filter(
-                user=user, content__chapter__course=course, is_completed=True
+                user=user,
+                content__chapter__course=course,
+                content__chapter__id__in=visible_chapters_qs.values_list('id', flat=True),
+                is_completed=True
             ).count()
             prog_pct = int((completed_contents / total_contents) * 100)
         else:
-            completed_count = course_progress.filter(is_completed=True).count()
+            completed_count = course_progress.filter(
+                is_completed=True,
+                chapter__in=visible_chapters_qs
+            ).count()
             prog_pct = int((completed_count / total_chapters) * 100) if total_chapters > 0 else 0
 
         last_p = course_progress.order_by('-viewed_at').first()
@@ -540,7 +566,9 @@ class ConsultantStatsView(APIView):
             "title": course.title,
             "progress": prog_pct,
             "chapters_total": total_chapters,
-            "chapters_completed": course_progress.filter(is_completed=True).count(),
+            "chapters_completed": course_progress.filter(
+                is_completed=True, chapter__in=visible_chapters_qs
+            ).count(),
             "last_activity": last_p.viewed_at if last_p else None,
             "is_complete": prog_pct == 100,
         }
@@ -575,9 +603,9 @@ class ConsultantStatsView(APIView):
                 p_course_ids = set(p_courses.values_list('id', flat=True))
                 group_course_ids.update(p_course_ids)
 
-                # Tous les cours du package (même non commencés)
+                # Tous les cours du package — avec exclusions appliquées
                 p_courses_stats = [
-                    self._course_stats(c, user, progresses)
+                    self._course_stats(c, user, progresses, package=pkg)
                     for c in p_courses
                 ]
                 packages_stats.append({
