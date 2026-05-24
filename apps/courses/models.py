@@ -44,6 +44,20 @@ class Course(models.Model):
 
 
 # ─────────────────────────────
+# 🗂️ COURSE PACKAGE
+# ─────────────────────────────
+class CoursePackage(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_packages")
+    courses = models.ManyToManyField(Course, related_name="packages", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+# ─────────────────────────────
 # 📖 CHAPTER
 # ─────────────────────────────
 class Chapter(models.Model):

@@ -20,6 +20,15 @@ export const courseService = {
   remove: (id) => api.delete(`courses/${id}/`),
 };
 
+// Packages
+export const packageService = {
+  getAll: () => api.get("courses/packages/"),
+  getOne: (id) => api.get(`courses/packages/${id}/`),
+  create: (data) => api.post("courses/packages/", data),
+  update: (id, data) => api.put(`courses/packages/${id}/`, data),
+  remove: (id) => api.delete(`courses/packages/${id}/`),
+};
+
 // Chapters
 export const chapterService = {
   create: (data) => api.post("courses/chapters/", data),

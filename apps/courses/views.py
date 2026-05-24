@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Chapter, Content, Course, CourseGroup, ChapterProgress, ContentProgress
+from .models import Chapter, Content, Course, CourseGroup, ChapterProgress, ContentProgress, CoursePackage
 from .permissions import IsConsultant, IsTL
 from apps.authentication.permissions import IsAdminOrTL, IsAdmin
 from .serializers import (
@@ -16,6 +16,7 @@ from .serializers import (
     ContentSerializer,
     CourseSerializer,
     CourseGroupSerializer,
+    CoursePackageSerializer,
 )
 from .utils import log_action
 
@@ -299,6 +300,28 @@ class MarkContentProgressView(APIView):
             "is_completed": progress.is_completed
         })
 
+
+
+# ─────────────────────────────
+# 🗂️ COURSE PACKAGES
+# ─────────────────────────────
+class CoursePackageListCreateView(generics.ListCreateAPIView):
+    serializer_class = CoursePackageSerializer
+    permission_classes = [IsAuthenticated, IsTL]
+
+    def get_queryset(self):
+        return CoursePackage.objects.filter(created_by=self.request.user).order_by("-created_at")
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class CoursePackageDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CoursePackageSerializer
+    permission_classes = [IsAuthenticated, IsTL]
+
+    def get_queryset(self):
+        return CoursePackage.objects.filter(created_by=self.request.user)
 
 
 # ─────────────────────────────

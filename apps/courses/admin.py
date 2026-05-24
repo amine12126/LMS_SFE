@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AuditLog, Chapter, Content, Course, CourseGroup
+from .models import AuditLog, Chapter, Content, Course, CourseGroup, CoursePackage
 
 
 @admin.register(Course)
@@ -36,3 +36,10 @@ class AuditLogAdmin(admin.ModelAdmin):
 class CourseGroupAdmin(admin.ModelAdmin):
     list_display = ("name", "created_by", "created_at")
     search_fields = ("name", "created_by__email")
+
+
+@admin.register(CoursePackage)
+class CoursePackageAdmin(admin.ModelAdmin):
+    list_display = ("name", "created_by", "created_at")
+    search_fields = ("name", "created_by__email")
+    filter_horizontal = ("courses",)

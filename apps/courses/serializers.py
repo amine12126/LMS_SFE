@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import AuditLog, Chapter, ChapterProgress, Content, Course, CourseGroup
+from .models import AuditLog, Chapter, ChapterProgress, Content, Course, CourseGroup, CoursePackage
 
 User = get_user_model()
 
@@ -154,3 +154,24 @@ class CourseListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ["id", "title", "description", "image", "duration", "expiration_date", "created_at", "is_mandatory"]
+
+
+# 🗂️ COURSE PACKAGE
+class CoursePackageSerializer(serializers.ModelSerializer):
+    courses_info = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CoursePackage
+        fields = ["id", "name", "description", "created_by", "courses", "created_at", "courses_info"]
+        read_only_fields = ["created_by", "created_at"]
+
+    def get_courses_info(self, obj):
+        request = self.context.get('request')
+        return [
+            {
+                "id": c.id, 
+                "title": c.title, 
+                "image": request.build_absolute_uri(c.image.url) if c.image and request else (c.image.url if c.image else None)
+            } 
+            for c in obj.courses.filter(is_deleted=False)
+        ]
