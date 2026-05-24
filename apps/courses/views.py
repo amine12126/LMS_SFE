@@ -766,12 +766,24 @@ class ConsultantMyGroupsView(APIView):
             for p in g.packages.all():
                 p_courses = []
                 for c in p.courses.filter(is_deleted=False):
+                    # Récupérer les exclusions pour ce couple (package, course)
+                    exclusion = PackageCourseExclusion.objects.filter(
+                        package=p, course=c
+                    ).first()
+                    excluded_chapter_ids = (
+                        list(exclusion.excluded_chapters.values_list('id', flat=True))
+                        if exclusion else []
+                    )
+                    # Nombre de chapitres visibles après exclusions
+                    visible_chapters = c.chapters.exclude(id__in=excluded_chapter_ids).count()
+
                     p_courses.append({
                         "id": c.id,
                         "title": c.title,
                         "description": getattr(c, 'description', ''),
                         "duration": getattr(c, 'duration', ''),
-                        "chapters_count": c.chapters.count()
+                        "chapters_count": visible_chapters,           # ✅ Filtré
+                        "chapters_total_original": c.chapters.count() # Info bonus
                     })
                 packages_data.append({
                     "id": p.id,
@@ -789,6 +801,7 @@ class ConsultantMyGroupsView(APIView):
             })
             
         return Response(data)
+
 
 
 # ─────────────────────────────
