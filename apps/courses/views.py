@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
+from drf_spectacular.utils import extend_schema
 
 from .models import Chapter, Content, Course, CourseGroup, ChapterProgress, ContentProgress, CoursePackage, PackageCourseExclusion
 from .permissions import IsConsultant, IsTL
@@ -141,6 +142,21 @@ class ChapterDetailView(generics.RetrieveUpdateDestroyAPIView):
 # ─────────────────────────────
 # 📦 CONTENT
 # ─────────────────────────────
+@extend_schema(
+    request={
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'chapter': {'type': 'integer', 'description': 'ID du chapitre (ex: 46)'},
+                'type': {'type': 'string', 'enum': ['image', 'pdf', 'video', 'link'], 'description': 'Type de contenu'},
+                'file': {'type': 'string', 'format': 'binary', 'description': 'Le fichier à téléverser (Image, PDF ou Vidéo)'},
+                'url': {'type': 'string', 'description': 'Lien optionnel pour type link'},
+                'order': {'type': 'integer', 'description': 'Ordre (optionnel)'}
+            },
+            'required': ['chapter', 'type']
+        }
+    }
+)
 class ContentCreateView(generics.CreateAPIView):
     serializer_class = ContentSerializer
     permission_classes = [IsAuthenticated, IsTL]
