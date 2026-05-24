@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { consultantCourseService } from "../services/api.js";
 import "./ConsultantStatistique.css";
 
@@ -20,6 +20,25 @@ function timeAgo(dateString) {
   if (diff < 3600) return `Il y a ${Math.floor(diff / 60)} min`;
   if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)} h`;
   return `Il y a ${Math.floor(diff / 86400)} j`;
+}
+
+// ── Barre de recherche ──────────────────────────────────────
+function SearchBar({ value, onChange, placeholder = "Rechercher un cours..." }) {
+  return (
+    <div className="cs-search-wrap">
+      <span className="cs-search-icon">🔍</span>
+      <input
+        className="cs-search-input"
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
+      {value && (
+        <button className="cs-search-clear" onClick={() => onChange("")}>✕</button>
+      )}
+    </div>
+  );
 }
 
 // ── Carte de progression individuelle ──────────────────────
@@ -57,19 +76,183 @@ function CourseCard({ course }) {
   );
 }
 
-// ── Bloc générique ──────────────────────────────────────────
-function SectionBlock({ icon, title, accentColor, borderColor, children, emptyMsg }) {
+// ── Grille de cours filtrée ─────────────────────────────────
+function CourseGrid({ courses, query }) {
+  const filtered = useMemo(() =>
+    query.trim()
+      ? courses.filter(c => c.title.toLowerCase().includes(query.toLowerCase()))
+      : courses,
+    [courses, query]
+  );
+
+  if (filtered.length === 0) {
+    return (
+      <div className="cs-empty" style={{ padding: "20px", fontSize: "0.9rem" }}>
+        {query ? `Aucun cours trouvé pour "${query}".` : "Aucun cours disponible."}
+      </div>
+    );
+  }
+
+  return (
+    <div className="cs-courses-grid">
+      {filtered.map(course => (
+        <div key={course.id} style={{ position: "relative" }}>
+          <CourseCard course={course} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Bloc générique avec barre de recherche ─────────────────
+function SectionBlock({ icon, title, accentColor, courses, emptyMsg, children }) {
+  const [query, setQuery] = useState("");
+
   return (
     <div className="cs-block" style={{ borderLeftColor: accentColor }}>
       <div className="cs-block-header" style={{ background: `${accentColor}15` }}>
         <span style={{ fontSize: "1.6rem" }}>{icon}</span>
         <h2 className="cs-block-title" style={{ color: accentColor }}>{title}</h2>
+        {courses && courses.length > 0 && (
+          <span style={{ marginLeft: "auto", fontSize: "0.82rem", color: accentColor, fontWeight: 700 }}>
+            {courses.length} cours
+          </span>
+        )}
       </div>
+
       <div className="cs-block-body">
-        {children || (
-          <div className="cs-empty" style={{ border: `1px dashed ${accentColor}40` }}>
-            {emptyMsg}
-          </div>
+        {/* Barre de recherche si des cours existent */}
+        {courses && courses.length > 0 && (
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            placeholder={`Rechercher dans ${title.toLowerCase()}...`}
+          />
+        )}
+
+        {courses ? (
+          courses.length === 0 ? (
+            <div className="cs-empty">{emptyMsg}</div>
+          ) : (
+            <CourseGrid courses={courses} query={query} />
+          )
+        ) : children}
+      </div>
+    </div>
+  );
+}
+
+// ── Bloc Groupes (avec recherche par groupe) ────────────────
+function GroupsBlock({ groups }) {
+  const [globalQuery, setGlobalQuery] = useState("");
+
+  return (
+    <div className="cs-block" style={{ borderLeftColor: "#7c3aed" }}>
+      <div className="cs-block-header" style={{ background: "#7c3aed15" }}>
+        <span style={{ fontSize: "1.6rem" }}>🏢</span>
+        <h2 className="cs-block-title" style={{ color: "#7c3aed" }}>Groupes</h2>
+        {groups.length > 0 && (
+          <span style={{ marginLeft: "auto", fontSize: "0.82rem", color: "#7c3aed", fontWeight: 700 }}>
+            {groups.length} groupe{groups.length > 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
+
+      <div className="cs-block-body">
+        {groups.length === 0 ? (
+          <div className="cs-empty">Vous n'appartenez à aucun groupe pour le moment.</div>
+        ) : (
+          <>
+            {/* Recherche globale dans tous les groupes */}
+            <SearchBar
+              value={globalQuery}
+              onChange={setGlobalQuery}
+              placeholder="Rechercher un cours dans tous les groupes..."
+            />
+
+            {groups.map(group => {
+              // Filtrer cours et packages selon la recherche
+              const filteredCourses = globalQuery
+                ? group.courses.filter(c => c.title.toLowerCase().includes(globalQuery.toLowerCase()))
+                : group.courses;
+
+              const filteredPackages = group.packages.map(pkg => ({
+                ...pkg,
+                courses: globalQuery
+                  ? pkg.courses.filter(c => c.title.toLowerCase().includes(globalQuery.toLowerCase()))
+                  : pkg.courses
+              })).filter(pkg => !globalQuery || pkg.courses.length > 0);
+
+              if (globalQuery && filteredCourses.length === 0 && filteredPackages.length === 0) return null;
+
+              return (
+                <div key={group.id} className="cs-group-block">
+                  <div className="cs-group-name">
+                    <span>📁</span> {group.name}
+                  </div>
+
+                  {/* Sous-bloc : Cours directs */}
+                  <div className="cs-subblock">
+                    <div className="cs-subblock-label" style={{ color: "#3b9eff" }}>
+                      📚 Cours du groupe
+                    </div>
+                    {filteredCourses.length === 0 ? (
+                      <p className="cs-sub-empty">
+                        {globalQuery ? `Aucun résultat pour "${globalQuery}".` : "Aucun cours individuel dans ce groupe."}
+                      </p>
+                    ) : (
+                      <div className="cs-courses-grid">
+                        {filteredCourses.map(course => (
+                          <div key={course.id} style={{ position: "relative" }}>
+                            <CourseCard course={course} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Sous-bloc : Packages */}
+                  <div className="cs-subblock">
+                    <div className="cs-subblock-label" style={{ color: "#7c3aed" }}>
+                      🗂️ Packages de cours
+                    </div>
+                    {filteredPackages.length === 0 ? (
+                      <p className="cs-sub-empty">
+                        {globalQuery ? `Aucun résultat pour "${globalQuery}".` : "Aucun package de cours dans ce groupe."}
+                      </p>
+                    ) : (
+                      filteredPackages.map(pkg => (
+                        <div key={pkg.id} className="cs-package-block">
+                          <div className="cs-package-header">
+                            <span style={{ fontSize: "1.2rem" }}>📦</span>
+                            <div>
+                              <strong>{pkg.name}</strong>
+                              {pkg.description && (
+                                <p style={{ margin: "2px 0 0", fontSize: "0.82rem", color: "var(--ink-3)" }}>
+                                  {pkg.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          {pkg.courses.length === 0 ? (
+                            <p className="cs-sub-empty">Aucun cours commencé dans ce package.</p>
+                          ) : (
+                            <div className="cs-courses-grid">
+                              {pkg.courses.map(course => (
+                                <div key={course.id} style={{ position: "relative" }}>
+                                  <CourseCard course={course} />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </>
         )}
       </div>
     </div>
@@ -97,11 +280,11 @@ function ConsultantStatistique() {
     );
   }
 
-  const kpis           = data?.kpis           || {};
-  const publicCourses  = data?.public_courses  || [];
+  const kpis             = data?.kpis             || {};
+  const publicCourses    = data?.public_courses    || [];
   const mandatoryCourses = data?.mandatory_courses || [];
-  const groups         = data?.groups          || [];
-  const timeline       = data?.timeline        || [];
+  const groups           = data?.groups            || [];
+  const timeline         = data?.timeline          || [];
 
   return (
     <div className="cs-page page-enter">
@@ -133,7 +316,6 @@ function ConsultantStatistique() {
 
       {/* Layout principal */}
       <div className="cs-layout">
-        {/* COLONNE PRINCIPALE : 3 blocs */}
         <div className="cs-main">
 
           {/* ── BLOC 1 : COURS PUBLICS ── */}
@@ -141,107 +323,21 @@ function ConsultantStatistique() {
             icon="🌐"
             title="Cours Publics"
             accentColor="#3b9eff"
-            emptyMsg="Vous n'avez pas encore commencé de cours publics."
-          >
-            {publicCourses.length > 0 && (
-              <div className="cs-courses-grid">
-                {publicCourses.map(course => (
-                  <div key={course.id} style={{ position: "relative" }}>
-                    <CourseCard course={course} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </SectionBlock>
+            courses={publicCourses}
+            emptyMsg="Aucun cours public disponible pour le moment."
+          />
 
           {/* ── BLOC 2 : COURS OBLIGATOIRES ── */}
           <SectionBlock
             icon="⚠️"
             title="Cours Obligatoires"
             accentColor="#f59e0b"
+            courses={mandatoryCourses}
             emptyMsg="Aucun cours obligatoire assigné pour le moment."
-          >
-            {mandatoryCourses.length > 0 && (
-              <div className="cs-courses-grid">
-                {mandatoryCourses.map(course => (
-                  <div key={course.id} style={{ position: "relative" }}>
-                    <CourseCard course={course} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </SectionBlock>
+          />
 
           {/* ── BLOC 3 : GROUPES ── */}
-          <SectionBlock
-            icon="🏢"
-            title="Groupes"
-            accentColor="#7c3aed"
-            emptyMsg="Vous n'appartenez à aucun groupe pour le moment."
-          >
-            {groups.length > 0 && groups.map(group => (
-              <div key={group.id} className="cs-group-block">
-                <div className="cs-group-name">
-                  <span>📁</span> {group.name}
-                </div>
-
-                {/* Sous-bloc : Cours du groupe */}
-                <div className="cs-subblock">
-                  <div className="cs-subblock-label" style={{ color: "#3b9eff" }}>
-                    📚 Cours du groupe
-                  </div>
-                  {group.courses.length === 0 ? (
-                    <p className="cs-sub-empty">Aucun cours individuel dans ce groupe.</p>
-                  ) : (
-                    <div className="cs-courses-grid">
-                      {group.courses.map(course => (
-                        <div key={course.id} style={{ position: "relative" }}>
-                          <CourseCard course={course} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Sous-bloc : Packages du groupe */}
-                <div className="cs-subblock">
-                  <div className="cs-subblock-label" style={{ color: "#7c3aed" }}>
-                    🗂️ Packages de cours
-                  </div>
-                  {group.packages.length === 0 ? (
-                    <p className="cs-sub-empty">Aucun package de cours dans ce groupe.</p>
-                  ) : (
-                    group.packages.map(pkg => (
-                      <div key={pkg.id} className="cs-package-block">
-                        <div className="cs-package-header">
-                          <span style={{ fontSize: "1.2rem" }}>📦</span>
-                          <div>
-                            <strong>{pkg.name}</strong>
-                            {pkg.description && (
-                              <p style={{ margin: "2px 0 0", fontSize: "0.82rem", color: "var(--ink-3)" }}>
-                                {pkg.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        {pkg.courses.length === 0 ? (
-                          <p className="cs-sub-empty">Aucun cours commencé dans ce package.</p>
-                        ) : (
-                          <div className="cs-courses-grid">
-                            {pkg.courses.map(course => (
-                              <div key={course.id} style={{ position: "relative" }}>
-                                <CourseCard course={course} />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            ))}
-          </SectionBlock>
+          <GroupsBlock groups={groups} />
 
         </div>
 
