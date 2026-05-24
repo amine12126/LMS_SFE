@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AuditLog, Chapter, Content, Course
+from .models import AuditLog, Chapter, Content, Course, CourseGroup
 
 
 @admin.register(Course)
@@ -30,3 +30,9 @@ class AuditLogAdmin(admin.ModelAdmin):
     list_display = ("user", "action", "model_name", "object_id", "created_at")
     list_filter = ("action", "model_name", "created_at")
     search_fields = ("user__email", "description")
+
+
+@admin.register(CourseGroup)
+class CourseGroupAdmin(admin.ModelAdmin):
+    list_display = ("name", "created_by", "created_at")
+    search_fields = ("name", "created_by__email")
