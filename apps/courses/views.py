@@ -594,11 +594,12 @@ class ConsultantStatsView(APIView):
                 "packages": packages_stats,
             })
 
-        # ── Cours publics : TOUS les cours publics accessibles ─────
+        # ── Cours publics : TOUS les cours publics (même ceux dans un package) ──
+        # Un cours public peut aussi être dans un package avec une version personnalisée.
+        # Il doit apparaître dans les DEUX blocs : public (version complète) + package (version filtrée).
         all_public = Course.objects.filter(
             is_deleted=False, is_public=True, is_mandatory=False
-        ).exclude(id__in=group_course_ids)
-
+        )
         public_courses = [
             self._course_stats(c, user, progresses)
             for c in all_public
