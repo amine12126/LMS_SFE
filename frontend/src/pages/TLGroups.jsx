@@ -371,29 +371,81 @@ function TLGroups() {
                 )}
 
                 {/* ASSIGNER UN PACKAGE */}
-                <div style={{ background: "var(--cream)", padding: "20px", borderRadius: "12px", marginBottom: "32px", border: "1px solid var(--border-c)" }}>
-                  <h3 style={{ margin: "0 0 16px", fontSize: "1.1rem", color: "var(--ink)" }}>🗂️ Assigner un Package de Cours</h3>
-                  <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-                    <select 
-                      className="tlg-input" 
-                      style={{ flex: 1, minWidth: "200px" }}
-                      value={packageToAssign}
-                      onChange={e => setPackageToAssign(e.target.value)}
-                    >
-                      <option value="">-- Choisir un package existant --</option>
-                      {packages.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
-                    <button 
-                      className="tlg-btn-submit" 
-                      style={{ marginTop: 0, width: "auto", padding: "12px 24px" }}
-                      disabled={!packageToAssign || assigningPackage}
-                      onClick={handleAssignPackage}
-                    >
-                      {assigningPackage ? "..." : "Assigner"}
-                    </button>
+                <div style={{
+                  background: "linear-gradient(135deg, rgba(59,158,255,0.07) 0%, rgba(120,80,255,0.07) 100%)",
+                  padding: "24px",
+                  borderRadius: "14px",
+                  marginBottom: "32px",
+                  border: "2px solid rgba(59,158,255,0.25)"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "1.5rem" }}>🗂️</span>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: "1.1rem", color: "var(--ink)", fontWeight: 700 }}>Assigner un Package de Cours</h3>
+                      <p style={{ margin: "2px 0 0", fontSize: "0.82rem", color: "var(--ink-3)" }}>
+                        Un package regroupe plusieurs cours personnalisables (exclusions de chapitres par consultant).
+                      </p>
+                    </div>
                   </div>
+
+                  {packages.length === 0 ? (
+                    <div style={{
+                      background: "rgba(255,200,80,0.1)",
+                      border: "1px solid rgba(255,200,80,0.4)",
+                      borderRadius: "10px",
+                      padding: "14px 18px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: "12px"
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ fontSize: "1.3rem" }}>⚠️</span>
+                        <span style={{ color: "#a06000", fontSize: "0.92rem", fontWeight: 600 }}>
+                          Vous n'avez aucun package créé. Créez d'abord un package depuis la page "Cours".
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => navigate("/tl/courses")}
+                        style={{
+                          background: "#f59e0b",
+                          color: "#fff",
+                          border: "none",
+                          padding: "8px 18px",
+                          borderRadius: "8px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontSize: "0.88rem",
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        ➕ Créer un package
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+                      <select
+                        className="tlg-input"
+                        style={{ flex: 1, minWidth: "220px", borderColor: "rgba(59,158,255,0.4)" }}
+                        value={packageToAssign}
+                        onChange={e => setPackageToAssign(e.target.value)}
+                      >
+                        <option value="">-- Choisir un package ({packages.length} disponible{packages.length > 1 ? "s" : ""}) --</option>
+                        {packages.map(p => (
+                          <option key={p.id} value={p.id}>📦 {p.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        className="tlg-btn-submit"
+                        style={{ marginTop: 0, width: "auto", padding: "12px 28px", background: "linear-gradient(135deg, #3b9eff, #7850ff)" }}
+                        disabled={!packageToAssign || assigningPackage}
+                        onClick={handleAssignPackage}
+                      >
+                        {assigningPackage ? "⏳ Assignation..." : "✅ Assigner le Package"}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* PACKAGES DÉJÀ ASSIGNÉS */}

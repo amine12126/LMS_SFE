@@ -362,7 +362,11 @@ class CoursePackageListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsTL]
 
     def get_queryset(self):
-        return CoursePackage.objects.filter(created_by=self.request.user).order_by("-created_at")
+        user = self.request.user
+        if user.role == "admin":
+            return CoursePackage.objects.all().order_by("-created_at")
+        # TL voit ses propres packages + ceux des autres TL dans ses groupes partagés
+        return CoursePackage.objects.filter(created_by=user).order_by("-created_at")
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
