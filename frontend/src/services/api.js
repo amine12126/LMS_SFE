@@ -5,7 +5,7 @@ const api = API;
 // Courses
 export const consultantCourseService = {
   browse: () => api.get("courses/browse/"),
-  getOne: (id) => api.get(`courses/browse/${id}/`),
+  getOne: (id, packageId = null) => api.get(packageId ? `courses/browse/${id}/?package_id=${packageId}` : `courses/browse/${id}/`),
   markProgress: (chapterId, action) => api.post(`courses/chapters/${chapterId}/progress/`, { action }),
   markContentProgress: (contentId) => api.post(`courses/contents/${contentId}/progress/`),
   getStats: () => api.get("courses/consultant-stats/"),
@@ -58,6 +58,8 @@ export const groupService = {
   update: (id, data) => api.put(`courses/groups/${id}/`, data),
   remove: (id) => api.delete(`courses/groups/${id}/`),
   assignCourse: (groupId, courseId) => api.post(`courses/groups/${groupId}/assign-course/`, { course_id: courseId }),
+  assignPackage: (groupId, packageId) => api.post(`courses/groups/${groupId}/assign-package/`, { package_id: packageId }),
+  unassignPackage: (groupId, packageId) => api.post(`courses/groups/${groupId}/unassign-package/`, { package_id: packageId }),
 };
 
 export const statsService = {

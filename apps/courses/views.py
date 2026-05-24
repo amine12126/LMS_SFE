@@ -254,6 +254,57 @@ class GroupAssignCourseView(APIView):
         return Response({"detail": f"Le cours a été assigné avec succès au groupe {group.name}."})
 
 
+class GroupAssignPackageView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminOrTL]
+
+    def post(self, request, pk):
+        if request.user.role == "admin":
+            group = generics.get_object_or_404(CourseGroup, pk=pk)
+        else:
+            group = generics.get_object_or_404(
+                CourseGroup, 
+                Q(pk=pk) & (Q(created_by=request.user) | Q(team_leaders=request.user))
+            )
+            
+        package_id = request.data.get("package_id")
+        if not package_id:
+            raise ValidationError("package_id est requis.")
+            
+        if request.user.role == "admin":
+            package = generics.get_object_or_404(CoursePackage, pk=package_id)
+        else:
+            package = generics.get_object_or_404(CoursePackage, pk=package_id, created_by=request.user)
+        
+        group.packages.add(package)
+        return Response({"detail": f"Le package a été assigné avec succès au groupe {group.name}."})
+
+
+class GroupUnassignPackageView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminOrTL]
+
+    def post(self, request, pk):
+        if request.user.role == "admin":
+            group = generics.get_object_or_404(CourseGroup, pk=pk)
+        else:
+            group = generics.get_object_or_404(
+                CourseGroup, 
+                Q(pk=pk) & (Q(created_by=request.user) | Q(team_leaders=request.user))
+            )
+            
+        package_id = request.data.get("package_id")
+        if not package_id:
+            raise ValidationError("package_id est requis.")
+            
+        if request.user.role == "admin":
+            package = generics.get_object_or_404(CoursePackage, pk=package_id)
+        else:
+            package = generics.get_object_or_404(CoursePackage, pk=package_id, created_by=request.user)
+        
+        group.packages.remove(package)
+        return Response({"detail": f"Le package a été retiré avec succès du groupe {group.name}."})
+
+
+
 # ─────────────────────────────
 # 📈 PROGRESS
 # ─────────────────────────────
@@ -622,7 +673,7 @@ class ConsultantMyGroupsView(APIView):
 
     def get(self, request):
         user = request.user
-        groups = CourseGroup.objects.filter(consultants=user).prefetch_related('courses', 'created_by')
+        groups = CourseGroup.objects.filter(consultants=user).prefetch_related('courses', 'packages', 'created_by')
         
         data = []
         for g in groups:
@@ -637,11 +688,30 @@ class ConsultantMyGroupsView(APIView):
                     "chapters_count": c.chapters.count()
                 })
             
+            packages_data = []
+            for p in g.packages.all():
+                p_courses = []
+                for c in p.courses.filter(is_deleted=False):
+                    p_courses.append({
+                        "id": c.id,
+                        "title": c.title,
+                        "description": getattr(c, 'description', ''),
+                        "duration": getattr(c, 'duration', ''),
+                        "chapters_count": c.chapters.count()
+                    })
+                packages_data.append({
+                    "id": p.id,
+                    "name": p.name,
+                    "description": p.description,
+                    "courses": p_courses
+                })
+            
             data.append({
                 "id": g.id,
                 "name": g.name,
                 "created_by": f"{g.created_by.prenom} {g.created_by.nom}".strip(),
-                "courses": course_data
+                "courses": course_data,
+                "packages": packages_data
             })
             
         return Response(data)

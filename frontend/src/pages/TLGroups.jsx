@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import NavbarTL from "../components/NavbarTL.jsx";
-import { groupService, courseService } from "../services/api.js";
+import { groupService, courseService, packageService } from "../services/api.js";
 import { getConsultants } from "../api/user.js";
 import "./TLGroups.css";
 
@@ -10,12 +10,15 @@ function TLGroups() {
   const [groups, setGroups] = useState([]);
   const [consultants, setConsultants] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Group Details
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [courseToAssign, setCourseToAssign] = useState("");
+  const [packageToAssign, setPackageToAssign] = useState("");
   const [assigning, setAssigning] = useState(false);
+  const [assigningPackage, setAssigningPackage] = useState(false);
 
   // Edit/Delete state
   const [isEditing, setIsEditing] = useState(false);
@@ -33,14 +36,16 @@ function TLGroups() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [grpRes, consRes, crsRes] = await Promise.all([
+      const [grpRes, consRes, crsRes, pkgRes] = await Promise.all([
         groupService.getAll(),
         getConsultants(),
-        courseService.getAll()
+        courseService.getAll(),
+        packageService.getAll()
       ]);
       setGroups(grpRes.data);
       setConsultants(consRes.data);
       setCourses(crsRes.data);
+      setPackages(pkgRes.data);
     } catch (err) {
       console.error(err);
       setError("Erreur lors du chargement des données.");
@@ -186,6 +191,54 @@ function TLGroups() {
     }
   };
 
+  const handleAssignPackage = async () => {
+    if (!packageToAssign) return;
+    setAssigningPackage(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await groupService.assignPackage(selectedGroup.id, packageToAssign);
+      setSuccess("Package de cours assigné avec succès au groupe !");
+      setPackageToAssign("");
+      
+      const grpRes = await groupService.getAll();
+      setGroups(grpRes.data);
+      
+      const updatedGroup = grpRes.data.find(g => g.id === selectedGroup.id);
+      setSelectedGroup(updatedGroup);
+
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de l'assignation du package.");
+    } finally {
+      setAssigningPackage(false);
+    }
+  };
+
+  const handleUnassignPackage = async (packageId) => {
+    if (!window.confirm("Voulez-vous vraiment retirer ce package de ce groupe ?")) return;
+    setError("");
+    setSuccess("");
+
+    try {
+      await groupService.unassignPackage(selectedGroup.id, packageId);
+      setSuccess("Package retiré avec succès du groupe !");
+      
+      const grpRes = await groupService.getAll();
+      setGroups(grpRes.data);
+      
+      const updatedGroup = grpRes.data.find(g => g.id === selectedGroup.id);
+      setSelectedGroup(updatedGroup);
+
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors du retrait du package.");
+    }
+  };
+
   return (
     <>
       <NavbarTL />
@@ -315,6 +368,58 @@ function TLGroups() {
                   </ul>
                 ) : (
                   <p style={{ color: "var(--ink-3)", fontStyle: "italic", marginBottom: "32px" }}>Aucun cours n'est assigné à ce groupe pour le moment.</p>
+                )}
+
+                {/* ASSIGNER UN PACKAGE */}
+                <div style={{ background: "var(--cream)", padding: "20px", borderRadius: "12px", marginBottom: "32px", border: "1px solid var(--border-c)" }}>
+                  <h3 style={{ margin: "0 0 16px", fontSize: "1.1rem", color: "var(--ink)" }}>🗂️ Assigner un Package de Cours</h3>
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+                    <select 
+                      className="tlg-input" 
+                      style={{ flex: 1, minWidth: "200px" }}
+                      value={packageToAssign}
+                      onChange={e => setPackageToAssign(e.target.value)}
+                    >
+                      <option value="">-- Choisir un package existant --</option>
+                      {packages.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                    <button 
+                      className="tlg-btn-submit" 
+                      style={{ marginTop: 0, width: "auto", padding: "12px 24px" }}
+                      disabled={!packageToAssign || assigningPackage}
+                      onClick={handleAssignPackage}
+                    >
+                      {assigningPackage ? "..." : "Assigner"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* PACKAGES DÉJÀ ASSIGNÉS */}
+                <h3 style={{ fontSize: "1.1rem", marginBottom: "16px" }}>Packages Actuels du Groupe</h3>
+                {selectedGroup.assigned_packages && selectedGroup.assigned_packages.length > 0 ? (
+                  <ul style={{ listStyle: "none", padding: 0, marginBottom: "32px" }}>
+                    {selectedGroup.assigned_packages.map(p => (
+                      <li key={p.id} style={{ padding: "12px 16px", background: "#fff", border: "1px solid var(--border-c)", borderRadius: "8px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                          <span style={{ fontSize: "1.2rem" }}>🗂️</span>
+                          <div>
+                            <strong style={{ color: "var(--ink)" }}>{p.name}</strong>
+                            <div style={{ fontSize: "0.82rem", color: "var(--ink-3)" }}>{p.courses.length} cours inclus</div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleUnassignPackage(p.id)}
+                          style={{ background: "rgba(255, 69, 58, 0.1)", color: "#ff453a", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}
+                        >
+                          Retirer
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p style={{ color: "var(--ink-3)", fontStyle: "italic", marginBottom: "32px" }}>Aucun package de cours n'est assigné à ce groupe pour le moment.</p>
                 )}
 
               </div>

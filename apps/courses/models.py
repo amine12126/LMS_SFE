@@ -13,10 +13,12 @@ class CourseGroup(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_course_groups")
     team_leaders = models.ManyToManyField(User, related_name="managed_groups", blank=True)
     consultants = models.ManyToManyField(User, related_name="course_groups", blank=True)
+    packages = models.ManyToManyField("CoursePackage", related_name="groups", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
+
 
 
 # ─────────────────────────────

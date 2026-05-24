@@ -77,7 +77,7 @@ class ChapterSerializer(serializers.ModelSerializer):
 
 # 📚 COURSE
 class CourseSerializer(serializers.ModelSerializer):
-    chapters = ChapterSerializer(many=True, read_only=True)
+    chapters = serializers.SerializerMethodField()
     teacher_name = serializers.SerializerMethodField()
     teacher = serializers.SerializerMethodField()
 
@@ -85,6 +85,39 @@ class CourseSerializer(serializers.ModelSerializer):
         model = Course
         fields = "__all__"
         read_only_fields = ["created_by", "is_deleted", "created_at"]
+
+    def get_chapters(self, obj):
+        request = self.context.get("request")
+        package_id = None
+        if request and request.query_params.get("package_id"):
+            try:
+                package_id = int(request.query_params.get("package_id"))
+            except ValueError:
+                pass
+        
+        excluded_chapters = []
+        excluded_contents = []
+        if package_id:
+            exclusion = PackageCourseExclusion.objects.filter(
+                package_id=package_id, course_id=obj.id
+            ).first()
+            if exclusion:
+                excluded_chapters = list(exclusion.excluded_chapters.values_list("id", flat=True))
+                excluded_contents = list(exclusion.excluded_contents.values_list("id", flat=True))
+
+        chapters_qs = obj.chapters.exclude(id__in=excluded_chapters).order_by('order')
+        
+        # Serialize the chapters
+        serializer = ChapterSerializer(chapters_qs, many=True, context=self.context)
+        data = serializer.data
+        
+        # Now filter the contents of each serialized chapter if there are excluded contents
+        if excluded_contents:
+            for chap in data:
+                if 'contents' in chap:
+                    chap['contents'] = [c for c in chap['contents'] if c['id'] not in excluded_contents]
+                    
+        return data
 
     def get_teacher_name(self, obj):
         u = getattr(obj, "created_by", None)
@@ -123,6 +156,7 @@ class AuditLogSerializer(serializers.ModelSerializer):
 class CourseGroupSerializer(serializers.ModelSerializer):
     consultants_count = serializers.IntegerField(source='consultants.count', read_only=True)
     assigned_courses = serializers.SerializerMethodField()
+    assigned_packages = serializers.SerializerMethodField()
     team_leaders_info = serializers.SerializerMethodField()
     consultants_info = serializers.SerializerMethodField()
 
@@ -130,18 +164,39 @@ class CourseGroupSerializer(serializers.ModelSerializer):
         model = CourseGroup
         fields = [
             'id', 'name', 'created_by', 'team_leaders', 'team_leaders_info', 
-            'consultants', 'consultants_info', 'consultants_count', 'created_at', 'assigned_courses'
+            'consultants', 'consultants_info', 'consultants_count', 'created_at', 
+            'assigned_courses', 'packages', 'assigned_packages'
         ]
         read_only_fields = ['created_by', 'created_at']
         
     def get_assigned_courses(self, obj):
         return [{"id": c.id, "title": c.title} for c in obj.courses.filter(is_deleted=False)]
 
+    def get_assigned_packages(self, obj):
+        request = self.context.get('request')
+        return [
+            {
+                "id": p.id,
+                "name": p.name,
+                "description": p.description,
+                "courses": [
+                    {
+                        "id": c.id,
+                        "title": c.title,
+                        "image": request.build_absolute_uri(c.image.url) if c.image and request else (c.image.url if c.image else None)
+                    }
+                    for c in p.courses.filter(is_deleted=False)
+                ]
+            }
+            for p in obj.packages.all()
+        ]
+
     def get_team_leaders_info(self, obj):
         return [{"id": u.id, "nom": u.nom, "prenom": u.prenom, "email": u.email} for u in obj.team_leaders.all()]
 
     def get_consultants_info(self, obj):
         return [{"id": u.id, "nom": u.nom, "prenom": u.prenom, "email": u.email} for u in obj.consultants.all()]
+
 
 
 # 📈 PROGRESS

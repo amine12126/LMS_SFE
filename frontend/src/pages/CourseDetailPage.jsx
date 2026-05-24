@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { consultantCourseService } from "../services/api";
 import { API_BASE_URL } from "../api/axios.js";
 import ChapterList from "../components/ChapterList";
@@ -28,6 +28,8 @@ const DetailSkeleton = () => (
 const CourseDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const packageId = searchParams.get("package_id");
 
   const [course, setCourse] = useState(null);
   const [selectedChapter, setSelectedChapter] = useState(null);
@@ -38,7 +40,7 @@ const CourseDetailPage = () => {
   const fetchCourseData = (showLoading = true) => {
     if (showLoading) setLoading(true);
     consultantCourseService
-      .getOne(id)
+      .getOne(id, packageId)
       .then(({ data }) => {
         setCourse(data);
         if (selectedChapter) {
@@ -60,7 +62,7 @@ const CourseDetailPage = () => {
     setSelectedChapter(null);
     setSelectedIndex(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, packageId]);
 
   const handleSelectChapter = (chapter) => {
     if (!chapter) {

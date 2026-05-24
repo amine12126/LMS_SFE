@@ -26,6 +26,8 @@ urlpatterns = [
     path("groups/", CourseGroupListCreateView.as_view()),
     path("groups/<int:pk>/", CourseGroupDetailView.as_view()),
     path("groups/<int:pk>/assign-course/", GroupAssignCourseView.as_view()),
+    path("groups/<int:pk>/assign-package/", GroupAssignPackageView.as_view()),
+    path("groups/<int:pk>/unassign-package/", GroupUnassignPackageView.as_view()),
 
     # PACKAGES
     path("packages/", CoursePackageListCreateView.as_view()),

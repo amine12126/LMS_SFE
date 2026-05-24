@@ -142,30 +142,74 @@ function ConsultantGroupe() {
                   </button>
                 </div>
               ) : (
-                group.courses.length === 0 ? (
-                  <p style={{ color: "var(--ink-3)", fontStyle: "italic", marginTop: "16px" }}>Aucun cours n'est assigné à ce groupe pour le moment.</p>
-                ) : (
-                  <div className="cg-courses-grid" style={{ marginTop: "16px" }}>
-                    {group.courses.map(course => (
-                      <div key={course.id} className="cg-course-card">
-                        <h3 className="cg-course-title">{course.title}</h3>
-                        <p className="cg-course-desc">{course.description || "Aucune description disponible pour ce cours."}</p>
+                <div>
+                  {/* COURS DIRECTS */}
+                  <h3 style={{ fontSize: "1.1rem", marginTop: "24px", color: "var(--ink)", display: "flex", alignItems: "center", gap: "8px" }}>📚 Cours Individuels</h3>
+                  {group.courses.length === 0 ? (
+                    <p style={{ color: "var(--ink-3)", fontStyle: "italic", marginTop: "8px" }}>Aucun cours individuel assigné.</p>
+                  ) : (
+                    <div className="cg-courses-grid" style={{ marginTop: "12px" }}>
+                      {group.courses.map(course => (
+                        <div key={course.id} className="cg-course-card">
+                          <h3 className="cg-course-title">{course.title}</h3>
+                          <p className="cg-course-desc">{course.description || "Aucune description disponible pour ce cours."}</p>
 
-                        <div className="cg-course-meta">
-                          <span>⏱️ {course.duration || "Non spécifiée"}</span>
-                          <span>📑 {course.chapters_count} chapitres</span>
+                          <div className="cg-course-meta">
+                            <span>⏱️ {course.duration || "Non spécifiée"}</span>
+                            <span>📑 {course.chapters_count} chapitres</span>
+                          </div>
+
+                          <button
+                            className="cg-btn-open"
+                            onClick={() => navigate(`/consultant/courses/${course.id}`)}
+                          >
+                            Ouvrir le cours
+                          </button>
                         </div>
+                      ))}
+                    </div>
+                  )}
 
-                        <button
-                          className="cg-btn-open"
-                          onClick={() => navigate(`/consultant/courses/${course.id}`)}
-                        >
-                          Ouvrir le cours
-                        </button>
+                  {/* PACKAGES DE COURS */}
+                  <h3 style={{ fontSize: "1.1rem", marginTop: "32px", color: "var(--ink)", display: "flex", alignItems: "center", gap: "8px" }}>🗂️ Packages de Cours</h3>
+                  {!group.packages || group.packages.length === 0 ? (
+                    <p style={{ color: "var(--ink-3)", fontStyle: "italic", marginTop: "8px" }}>Aucun package de cours assigné.</p>
+                  ) : (
+                    group.packages.map(pkg => (
+                      <div key={pkg.id} style={{ marginTop: "16px", padding: "20px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-c, rgba(255,255,255,0.1))", borderRadius: "12px" }}>
+                        <div style={{ marginBottom: "16px" }}>
+                          <h4 style={{ fontSize: "1.15rem", margin: "0 0 4px", color: "#3b9eff" }}>📁 {pkg.name}</h4>
+                          <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--ink-3, #aaa)" }}>{pkg.description || "Aucune description disponible pour ce package."}</p>
+                        </div>
+                        
+                        {pkg.courses.length === 0 ? (
+                          <p style={{ color: "var(--ink-3)", fontStyle: "italic", margin: 0 }}>Aucun cours dans ce package.</p>
+                        ) : (
+                          <div className="cg-courses-grid">
+                            {pkg.courses.map(course => (
+                              <div key={course.id} className="cg-course-card">
+                                <h3 className="cg-course-title">{course.title}</h3>
+                                <p className="cg-course-desc">{course.description || "Aucune description disponible pour ce cours."}</p>
+
+                                <div className="cg-course-meta">
+                                  <span>⏱️ {course.duration || "Non spécifiée"}</span>
+                                  <span>📑 {course.chapters_count} chapitres</span>
+                                </div>
+
+                                <button
+                                  className="cg-btn-open"
+                                  onClick={() => navigate(`/consultant/courses/${course.id}?package_id=${pkg.id}`)}
+                                >
+                                  Ouvrir le cours personnalisé
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )
+                    ))
+                  )}
+                </div>
               )}
             </div>
           );
