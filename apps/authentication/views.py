@@ -4,8 +4,16 @@ from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 
-from .serializers import LoginSerializer, MeReadSerializer, RegisterSerializer, FaceSerializer
+from .serializers import (
+    LoginSerializer,
+    MeReadSerializer,
+    RegisterSerializer,
+    FaceSerializer,
+    ForgotPasswordSerializer,
+    ResetPasswordSerializer,
+)
 from .models import User, PasswordResetToken, UserFace, FaceAccessLog
 from .tokens import get_tokens
 from django.core.files.base import ContentFile
@@ -13,10 +21,12 @@ from .services import base64_to_bytes, compare_faces
 from .logs import get_client_ip
 
 
+
 # ================= REGISTER =================
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(request=RegisterSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request):
         # 🔒 Bloquer toute tentative d’envoi de role
         if "role" in request.data:
@@ -35,6 +45,7 @@ class RegisterView(APIView):
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(request=LoginSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -57,6 +68,7 @@ class LoginView(APIView):
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: MeReadSerializer})
     def get(self, request):
         return Response(MeReadSerializer(request.user).data)
 
@@ -65,6 +77,7 @@ class ProfileView(APIView):
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(request=ForgotPasswordSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request):
         email = request.data.get("email")
 
@@ -93,6 +106,7 @@ class ForgotPasswordView(APIView):
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(request=ResetPasswordSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request):
         token = request.data.get("token")
         password = request.data.get("password")
@@ -119,6 +133,7 @@ class ResetPasswordView(APIView):
 class SaveFaceView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=FaceSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request):
         serializer = FaceSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -137,6 +152,7 @@ class SaveFaceView(APIView):
 class AccessGroupView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=FaceSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request, group_id):
         serializer = FaceSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -50,3 +50,14 @@ class FaceSerializer(serializers.Serializer):
         max_length=128
     )
 
+
+# ================= PASSWORD RESET FLOW =================
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(help_text="L'adresse email du compte à réinitialiser.")
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField(help_text="Le jeton de réinitialisation reçu par email.")
+    password = serializers.CharField(help_text="Le nouveau mot de passe souhaité.")
+
+
