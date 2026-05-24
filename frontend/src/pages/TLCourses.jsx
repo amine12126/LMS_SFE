@@ -100,18 +100,38 @@ const CoursesPage = () => {
       <div className="page-enter">
         {error && <p className="error-banner">{error}</p>}
 
-        <div className="courses-tab-navigation">
+        <div style={{ display: "flex", gap: 16, marginBottom: 32, borderBottom: "1px solid var(--border)", paddingBottom: 12 }}>
           <button 
-            className={`tab-navigation-btn ${activeTab === "courses" ? "active" : ""}`}
+            type="button" 
             onClick={() => setActiveTab("courses")}
+            style={{ 
+              padding: "8px 16px", 
+              borderRadius: 20, 
+              border: "none", 
+              background: activeTab === "courses" ? "var(--text-1)" : "transparent", 
+              color: activeTab === "courses" ? "var(--bg-1)" : "var(--text-1)", 
+              fontWeight: 600, 
+              cursor: "pointer", 
+              transition: "all 0.2s" 
+            }}
           >
-            <span className="tab-icon">📚</span> Tous les cours
+            📚 Tous les cours
           </button>
           <button 
-            className={`tab-navigation-btn ${activeTab === "packages" ? "active" : ""}`}
+            type="button" 
             onClick={() => setActiveTab("packages")}
+            style={{ 
+              padding: "8px 16px", 
+              borderRadius: 20, 
+              border: "none", 
+              background: activeTab === "packages" ? "var(--accent)" : "transparent", 
+              color: activeTab === "packages" ? "#000" : "var(--text-1)", 
+              fontWeight: 600, 
+              cursor: "pointer", 
+              transition: "all 0.2s" 
+            }}
           >
-            <span className="tab-icon">🗂️</span> Packages de cours
+            🗂️ Packages de cours
           </button>
         </div>
 

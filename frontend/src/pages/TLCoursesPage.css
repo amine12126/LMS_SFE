@@ -298,47 +298,7 @@
   background: rgba(232, 255, 71, 0.1);
 }
 
-/* Tab Navigation Styles */
-.courses-tab-navigation {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 32px;
-  background: rgba(255, 255, 255, 0.02);
-  padding: 6px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  width: fit-content;
-}
 
-.tab-navigation-btn {
-  background: transparent;
-  border: none;
-  padding: 12px 24px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tab-navigation-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.tab-navigation-btn.active {
-  color: #000;
-  background: var(--accent);
-  box-shadow: 0 4px 15px rgba(232, 255, 71, 0.2);
-}
-
-.tab-navigation-btn.active .tab-icon {
-  filter: brightness(0);
-}
 
 /* Animations */
 .fade-in {
