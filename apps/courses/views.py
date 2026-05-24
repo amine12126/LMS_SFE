@@ -549,15 +549,13 @@ class ConsultantStatsView(APIView):
         user = request.user
 
         progresses = ChapterProgress.objects.filter(user=user).select_related('chapter', 'chapter__course')
+        # IDs des cours déjà commencés (pour les KPIs uniquement)
+        started_course_ids = set(progresses.values_list('chapter__course_id', flat=True).distinct())
 
-        course_ids = progresses.values_list('chapter__course_id', flat=True).distinct()
-        all_courses = Course.objects.filter(id__in=course_ids, is_deleted=False).select_related('created_by')
-
-        # Get groups + packages for this consultant
+        # ── Groupes + packages ─────────────────────────────────────
         groups = CourseGroup.objects.filter(consultants=user).prefetch_related('courses', 'packages__courses')
 
         group_course_ids = set()
-        group_package_course_ids = set()
         groups_data = []
 
         for g in groups:
@@ -565,23 +563,22 @@ class ConsultantStatsView(APIView):
             g_course_ids = set(g_courses.values_list('id', flat=True))
             group_course_ids.update(g_course_ids)
 
+            # Tous les cours du groupe (même non commencés)
             g_courses_stats = [
                 self._course_stats(c, user, progresses)
                 for c in g_courses
-                if c.id in course_ids
             ]
 
             packages_stats = []
             for pkg in g.packages.all():
                 p_courses = pkg.courses.filter(is_deleted=False)
                 p_course_ids = set(p_courses.values_list('id', flat=True))
-                group_package_course_ids.update(p_course_ids)
                 group_course_ids.update(p_course_ids)
 
+                # Tous les cours du package (même non commencés)
                 p_courses_stats = [
                     self._course_stats(c, user, progresses)
                     for c in p_courses
-                    if c.id in course_ids
                 ]
                 packages_stats.append({
                     "id": pkg.id,
@@ -597,24 +594,34 @@ class ConsultantStatsView(APIView):
                 "packages": packages_stats,
             })
 
-        # Public courses: not in any group/package
+        # ── Cours publics : TOUS les cours publics accessibles ─────
+        all_public = Course.objects.filter(
+            is_deleted=False, is_public=True, is_mandatory=False
+        ).exclude(id__in=group_course_ids)
+
         public_courses = [
             self._course_stats(c, user, progresses)
-            for c in all_courses
-            if c.is_public and c.id not in group_course_ids and not c.is_mandatory
+            for c in all_public
         ]
 
-        # Mandatory courses (can be public or group, shown separately)
+        # ── Cours obligatoires : TOUS les cours is_mandatory ───────
+        all_mandatory = Course.objects.filter(
+            is_deleted=False, is_mandatory=True
+        )
         mandatory_courses = [
             self._course_stats(c, user, progresses)
-            for c in all_courses
-            if c.is_mandatory
+            for c in all_mandatory
         ]
 
-        # KPIs
-        total_courses = all_courses.count()
+        # ── KPIs ───────────────────────────────────────────────────
+        all_accessible_ids = (
+            set(all_public.values_list('id', flat=True))
+            | set(all_mandatory.values_list('id', flat=True))
+            | group_course_ids
+        )
+        total_courses = len(started_course_ids & all_accessible_ids)
         completed_courses_count = sum(
-            1 for c in all_courses
+            1 for c in Course.objects.filter(id__in=started_course_ids, is_deleted=False)
             if self._course_stats(c, user, progresses)["is_complete"]
         )
         total_viewed_chapters = progresses.filter(is_viewed=True).count()
