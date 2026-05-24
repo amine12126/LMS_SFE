@@ -30,6 +30,8 @@ urlpatterns = [
     # PACKAGES
     path("packages/", CoursePackageListCreateView.as_view()),
     path("packages/<int:pk>/", CoursePackageDetailView.as_view()),
+    path("packages/<int:pkg_id>/exclusion/<int:course_id>/", PackageCourseExclusionView.as_view()),
+
 
     # STATS
     path("stats/", TLStatsView.as_view()),

@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Chapter, Content, Course, CourseGroup, ChapterProgress, ContentProgress, CoursePackage
+from .models import Chapter, Content, Course, CourseGroup, ChapterProgress, ContentProgress, CoursePackage, PackageCourseExclusion
 from .permissions import IsConsultant, IsTL
 from apps.authentication.permissions import IsAdminOrTL, IsAdmin
 from .serializers import (
@@ -17,6 +17,7 @@ from .serializers import (
     CourseSerializer,
     CourseGroupSerializer,
     CoursePackageSerializer,
+    PackageCourseExclusionSerializer,
 )
 from .utils import log_action
 
@@ -322,6 +323,55 @@ class CoursePackageDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return CoursePackage.objects.filter(created_by=self.request.user)
+
+
+# ─────────────────────────────
+# 🚫 PACKAGE COURSE EXCLUSION
+# ─────────────────────────────
+class PackageCourseExclusionView(APIView):
+    """
+    GET  /courses/packages/<pkg_id>/exclusion/<course_id>/
+         Retourne (ou crée) l'objet exclusion pour ce couple package/cours.
+
+    PATCH /courses/packages/<pkg_id>/exclusion/<course_id>/
+         Met à jour les listes excluded_chapter_ids / excluded_content_ids.
+    """
+    permission_classes = [IsAuthenticated, IsTL]
+
+    def _get_or_create(self, pkg_id, course_id, user):
+        package = CoursePackage.objects.filter(pk=pkg_id, created_by=user).first()
+        if not package:
+            return None, None
+        course = Course.objects.filter(pk=course_id, is_deleted=False).first()
+        if not course:
+            return package, None
+        excl, _ = PackageCourseExclusion.objects.get_or_create(package=package, course=course)
+        return package, excl
+
+    def get(self, request, pkg_id, course_id):
+        _, excl = self._get_or_create(pkg_id, course_id, request.user)
+        if excl is None:
+            return Response({'detail': 'Introuvable.'}, status=404)
+        ser = PackageCourseExclusionSerializer(excl, context={'request': request})
+        return Response(ser.data)
+
+    def patch(self, request, pkg_id, course_id):
+        _, excl = self._get_or_create(pkg_id, course_id, request.user)
+        if excl is None:
+            return Response({'detail': 'Introuvable.'}, status=404)
+
+        # Mise à jour des chapitres exclus
+        chapter_ids = request.data.get('excluded_chapter_ids', None)
+        content_ids = request.data.get('excluded_content_ids', None)
+
+        if chapter_ids is not None:
+            excl.excluded_chapters.set(Chapter.objects.filter(pk__in=chapter_ids))
+        if content_ids is not None:
+            excl.excluded_contents.set(Content.objects.filter(pk__in=content_ids))
+
+        excl.save()
+        ser = PackageCourseExclusionSerializer(excl, context={'request': request})
+        return Response(ser.data)
 
 
 # ─────────────────────────────

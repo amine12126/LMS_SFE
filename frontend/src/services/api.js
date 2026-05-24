@@ -29,6 +29,13 @@ export const packageService = {
   remove: (id) => api.delete(`courses/packages/${id}/`),
 };
 
+// Package Course Exclusions
+export const exclusionService = {
+  get: (pkgId, courseId) => api.get(`courses/packages/${pkgId}/exclusion/${courseId}/`),
+  update: (pkgId, courseId, data) => api.patch(`courses/packages/${pkgId}/exclusion/${courseId}/`, data),
+};
+
+
 // Chapters
 export const chapterService = {
   create: (data) => api.post("courses/chapters/", data),

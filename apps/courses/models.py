@@ -58,6 +58,25 @@ class CoursePackage(models.Model):
 
 
 # ─────────────────────────────
+# 🚫 PACKAGE COURSE EXCLUSION
+# Stocke uniquement les chapitres/contenus MASQUÉS dans un package
+# Le cours original n'est pas touché
+# ─────────────────────────────
+class PackageCourseExclusion(models.Model):
+    package         = models.ForeignKey(CoursePackage, on_delete=models.CASCADE, related_name="exclusions")
+    course          = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="exclusions")
+    excluded_chapters = models.ManyToManyField("Chapter", related_name="exclusions_as_chapter", blank=True)
+    excluded_contents = models.ManyToManyField("Content", related_name="exclusions_as_content", blank=True)
+
+    class Meta:
+        unique_together = ("package", "course")
+
+    def __str__(self):
+        return f"Exclusion: {self.package.name} / {self.course.title}"
+
+
+
+# ─────────────────────────────
 # 📖 CHAPTER
 # ─────────────────────────────
 class Chapter(models.Model):

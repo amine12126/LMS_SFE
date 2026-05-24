@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import AuditLog, Chapter, ChapterProgress, Content, Course, CourseGroup, CoursePackage
+from .models import AuditLog, Chapter, ChapterProgress, Content, Course, CourseGroup, CoursePackage, PackageCourseExclusion
 
 User = get_user_model()
 
@@ -175,3 +175,57 @@ class CoursePackageSerializer(serializers.ModelSerializer):
             } 
             for c in obj.courses.filter(is_deleted=False)
         ]
+
+
+# ─────────────────────────────
+# 🚫 PACKAGE COURSE EXCLUSION
+# ─────────────────────────────
+class PackageCourseExclusionSerializer(serializers.ModelSerializer):
+    # On expose les IDs pour le frontend
+    excluded_chapter_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Chapter.objects.all(), source='excluded_chapters', required=False
+    )
+    excluded_content_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Content.objects.all(), source='excluded_contents', required=False
+    )
+    # Vue complète du cours (chapitres + contenus) avec les exclusions marquées
+    course_view = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PackageCourseExclusion
+        fields = [
+            'id', 'package', 'course',
+            'excluded_chapter_ids', 'excluded_content_ids',
+            'course_view'
+        ]
+        read_only_fields = ['package', 'course', 'course_view']
+
+    def get_course_view(self, obj):
+        """Retourne les chapitres et contenus avec is_excluded marqué."""
+        excluded_chap_ids = set(obj.excluded_chapters.values_list('id', flat=True))
+        excluded_cont_ids = set(obj.excluded_contents.values_list('id', flat=True))
+        chapters = []
+        for chap in obj.course.chapters.order_by('order'):
+            contents = []
+            for cont in chap.contents.order_by('order'):
+                contents.append({
+                    'id': cont.id,
+                    'type': cont.type,
+                    'order': cont.order,
+                    'file': cont.file.url if cont.file else None,
+                    'url': cont.url,
+                    'is_excluded': cont.id in excluded_cont_ids,
+                })
+            chapters.append({
+                'id': chap.id,
+                'title': chap.title,
+                'order': chap.order,
+                'is_excluded': chap.id in excluded_chap_ids,
+                'contents': contents,
+            })
+        return {
+            'id': obj.course.id,
+            'title': obj.course.title,
+            'chapters': chapters,
+        }
+
