@@ -435,6 +435,76 @@ class PackageCourseExclusionView(APIView):
 class TLStatsView(APIView):
     permission_classes = [IsAuthenticated, IsTL]
 
+    def _get_course_stats(self, course, consultants, package=None):
+        excluded_chapter_ids = []
+        if package:
+            exclusion = PackageCourseExclusion.objects.filter(package=package, course=course).first()
+            if exclusion:
+                excluded_chapter_ids = list(exclusion.excluded_chapters.values_list('id', flat=True))
+        
+        visible_chapters = course.chapters.exclude(id__in=excluded_chapter_ids)
+        total_chapters = visible_chapters.count()
+        
+        visible_contents = Content.objects.filter(chapter__course=course).exclude(chapter__id__in=excluded_chapter_ids)
+        total_contents = visible_contents.count()
+        
+        viewers = ChapterProgress.objects.filter(
+            chapter__in=visible_chapters,
+            is_viewed=True,
+            user__in=consultants
+        ).values('user').distinct().count()
+        
+        chapters_data = []
+        for ch in visible_chapters:
+            ch_viewed = ChapterProgress.objects.filter(chapter=ch, is_viewed=True, user__in=consultants).count()
+            ch_comp = ChapterProgress.objects.filter(chapter=ch, is_completed=True, user__in=consultants).count()
+            chapters_data.append({
+                "id": ch.id,
+                "title": ch.title,
+                "viewed": ch_viewed,
+                "completed": ch_comp
+            })
+            
+        matrix = []
+        for cons in consultants:
+            cons_prog = ChapterProgress.objects.filter(user=cons, chapter__in=visible_chapters)
+            
+            if total_contents > 0:
+                completed_contents = ContentProgress.objects.filter(
+                    user=cons,
+                    content__in=visible_contents,
+                    is_completed=True
+                ).count()
+                progress_pct = int((completed_contents / total_contents) * 100)
+            else:
+                completed_count = cons_prog.filter(is_completed=True).count()
+                progress_pct = int((completed_count / total_chapters) * 100) if total_chapters > 0 else 0
+                
+            ch_status = []
+            for ch in visible_chapters:
+                p = cons_prog.filter(chapter=ch).first()
+                ch_status.append({
+                    "id": ch.id,
+                    "title": ch.title,
+                    "completed": p.is_completed if p else False
+                })
+                
+            matrix.append({
+                "id": cons.id,
+                "name": f"{cons.prenom} {cons.nom}".strip() or cons.email,
+                "progress": progress_pct,
+                "chapters": ch_status
+            })
+            
+        return {
+            "id": course.id,
+            "title": course.title,
+            "total_consultants": consultants.count(),
+            "viewers": viewers,
+            "chapters": chapters_data,
+            "matrix": matrix
+        }
+
     def get(self, request):
         tab = request.query_params.get("tab", "public")
         
@@ -442,75 +512,117 @@ class TLStatsView(APIView):
             courses = Course.objects.filter(created_by=request.user, is_public=True, is_deleted=False)
             total_consultants = User.objects.filter(role="consultant").count()
             consultants = User.objects.filter(role="consultant")
+            
+            courses_data = []
+            for course in courses:
+                courses_data.append(self._get_course_stats(course, consultants))
+                
+            return Response({
+                "courses": courses_data,
+                "packages": []
+            })
+            
         else:
             group_id = request.query_params.get("group_id")
             if not group_id:
-                return Response([])
+                return Response({"courses": [], "packages": []})
+                
             group = generics.get_object_or_404(CourseGroup, id=group_id, created_by=request.user)
             courses = group.courses.filter(is_deleted=False)
-            total_consultants = group.consultants.count()
             consultants = group.consultants.all()
             
-        data = []
-        for course in courses:
-            chapters = course.chapters.all()
-            total_chapters = chapters.count()
-            
-            # Viewers count for this course (at least one chapter viewed)
-            viewers = ChapterProgress.objects.filter(
-                chapter__course=course, 
-                is_viewed=True, 
-                user__in=consultants
-            ).values('user').distinct().count()
-            
-            chapters_data = []
-            for ch in chapters:
-                ch_viewed = ChapterProgress.objects.filter(chapter=ch, is_viewed=True, user__in=consultants).count()
-                ch_comp = ChapterProgress.objects.filter(chapter=ch, is_completed=True, user__in=consultants).count()
-                chapters_data.append({
-                    "id": ch.id,
-                    "title": ch.title,
-                    "viewed": ch_viewed,
-                    "completed": ch_comp
-                })
-            
-            matrix = []
-            total_contents = Content.objects.filter(chapter__in=chapters).count()
-            for cons in consultants:
-                cons_prog = ChapterProgress.objects.filter(user=cons, chapter__in=chapters)
-                if total_contents > 0:
-                    completed_contents = ContentProgress.objects.filter(user=cons, content__chapter__in=chapters, is_completed=True).count()
-                    progress_pct = int((completed_contents / total_contents) * 100)
-                else:
-                    completed_count = cons_prog.filter(is_completed=True).count()
-                    progress_pct = int((completed_count / total_chapters) * 100) if total_chapters > 0 else 0
+            # Courses stats
+            courses_data = []
+            for course in courses:
+                courses_data.append(self._get_course_stats(course, consultants))
                 
-                ch_status = []
-                for ch in chapters:
-                    p = cons_prog.filter(chapter=ch).first()
-                    ch_status.append({
-                        "id": ch.id,
-                        "title": ch.title,
-                        "completed": p.is_completed if p else False
+            # Packages stats
+            packages_data = []
+            for pkg in group.packages.all():
+                pkg_courses = pkg.courses.filter(is_deleted=False)
+                
+                # Courses stats inside package (with exclusions)
+                pkg_courses_stats = []
+                for course in pkg_courses:
+                    pkg_courses_stats.append(self._get_course_stats(course, consultants, package=pkg))
+                    
+                # Package matrix & info
+                package_total_contents = 0
+                package_total_chapters = 0
+                course_contents_info = {}
+                
+                for c in pkg_courses:
+                    exclusion = PackageCourseExclusion.objects.filter(package=pkg, course=c).first()
+                    excluded_ids = list(exclusion.excluded_chapters.values_list('id', flat=True)) if exclusion else []
+                    
+                    visible_chapters = c.chapters.exclude(id__in=excluded_ids)
+                    visible_contents = Content.objects.filter(chapter__course=c).exclude(chapter__id__in=excluded_ids)
+                    
+                    course_contents_info[c.id] = {
+                        "visible_chapters": visible_chapters,
+                        "visible_contents": visible_contents,
+                        "chapters_count": visible_chapters.count(),
+                        "contents_count": visible_contents.count()
+                    }
+                    package_total_contents += visible_contents.count()
+                    package_total_chapters += visible_chapters.count()
+                    
+                package_matrix = []
+                for cons in consultants:
+                    total_completed_contents = 0
+                    total_completed_chapters = 0
+                    courses_progress = {}
+                    
+                    for c in pkg_courses:
+                        info = course_contents_info[c.id]
+                        if info["contents_count"] > 0:
+                            comp_contents = ContentProgress.objects.filter(
+                                user=cons,
+                                content__in=info["visible_contents"],
+                                is_completed=True
+                            ).count()
+                            total_completed_contents += comp_contents
+                            c_prog = int((comp_contents / info["contents_count"]) * 100)
+                        else:
+                            comp_ch = ChapterProgress.objects.filter(
+                                user=cons,
+                                chapter__in=info["visible_chapters"],
+                                is_completed=True
+                            ).count()
+                            total_completed_chapters += comp_ch
+                            c_prog = int((comp_ch / info["chapters_count"]) * 100) if info["chapters_count"] > 0 else 0
+                        
+                        courses_progress[c.id] = c_prog
+                        
+                    if package_total_contents > 0:
+                        overall_progress = int((total_completed_contents / package_total_contents) * 100)
+                    elif package_total_chapters > 0:
+                        overall_progress = int((total_completed_chapters / package_total_chapters) * 100)
+                    else:
+                        overall_progress = 0
+                        
+                    package_matrix.append({
+                        "id": cons.id,
+                        "name": f"{cons.prenom} {cons.nom}".strip() or cons.email,
+                        "progress": overall_progress,
+                        "courses_progress": courses_progress
                     })
                     
-                matrix.append({
-                    "id": cons.id,
-                    "name": f"{cons.prenom} {cons.nom}".strip() or cons.email,
-                    "progress": progress_pct,
-                    "chapters": ch_status
+                packages_data.append({
+                    "id": pkg.id,
+                    "name": pkg.name,
+                    "description": pkg.description,
+                    "total_courses": pkg_courses.count(),
+                    "total_chapters": package_total_chapters,
+                    "courses": pkg_courses_stats,
+                    "matrix": package_matrix
                 })
                 
-            data.append({
-                "id": course.id,
-                "title": course.title,
-                "total_consultants": total_consultants,
-                "viewers": viewers,
-                "chapters": chapters_data,
-                "matrix": matrix
+            return Response({
+                "courses": courses_data,
+                "packages": packages_data
             })
-            
-        return Response(data)
+
 
 
 # ─────────────────────────────

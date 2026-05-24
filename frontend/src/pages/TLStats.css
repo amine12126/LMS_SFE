@@ -344,3 +344,117 @@
   font-size: 4rem;
   opacity: 0.5;
 }
+
+/* ── Sidebar Sections ── */
+.tls-sidebar-content {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.tls-sidebar-section {
+  padding: 10px 0;
+}
+
+.tls-sidebar-section-title {
+  padding: 10px 20px 6px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--ink-3, #7a6e65);
+  letter-spacing: 0.05em;
+  background: var(--cream, #faf7f2);
+  border-bottom: 1px solid var(--border-c, rgba(26, 20, 16, 0.05));
+  border-top: 1px solid var(--border-c, rgba(26, 20, 16, 0.05));
+}
+
+/* ── Sidebar Package Group ── */
+.tls-sidebar-package-group {
+  border-bottom: 1px solid var(--border-c, rgba(26, 20, 16, 0.05));
+}
+
+.tls-package-header-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  background: rgba(124, 58, 237, 0.02);
+  transition: background 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.tls-package-header-item:hover {
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.tls-package-header-item--active {
+  background: rgba(124, 58, 237, 0.1);
+  border-left-color: #7c3aed;
+}
+
+.tls-package-icon {
+  font-size: 1.3rem;
+}
+
+.tls-package-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tls-package-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink, #1a1410);
+}
+
+.tls-package-meta {
+  font-size: 0.76rem;
+  color: var(--ink-3, #7a6e65);
+}
+
+.tls-package-course-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.tls-package-course-item {
+  padding: 10px 20px 10px 32px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: background 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.tls-package-course-item:hover {
+  background: var(--cream, #faf7f2);
+}
+
+.tls-package-course-item--active {
+  background: rgba(196, 96, 42, 0.05);
+  border-left-color: var(--terra, #c4602a);
+}
+
+.tls-package-course-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink-2, #4a3f35);
+}
+
+.tls-package-course-meta {
+  font-size: 0.74rem;
+  color: var(--ink-3, #7a6e65);
+  padding-left: 14px;
+}
+
+.tls-course-desc-text {
+  color: var(--ink-3, #7a6e65);
+  font-size: 0.95rem;
+  margin: -20px 0 30px;
+  line-height: 1.5;
+}
+
