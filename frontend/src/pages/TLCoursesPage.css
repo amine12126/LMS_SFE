@@ -298,91 +298,336 @@
   background: rgba(232, 255, 71, 0.1);
 }
 
-/* Modal Specific Styles - Premium Glass */
-.pkg-modal {
-  max-width: 600px !important;
-  background: rgba(20, 20, 22, 0.85) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
-  border-radius: 20px !important;
+/* Tab Navigation Styles */
+.courses-tab-navigation {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  width: fit-content;
 }
 
-.pkg-modal h2 {
+.tab-navigation-btn {
+  background: transparent;
+  border: none;
+  padding: 12px 24px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-navigation-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-navigation-btn.active {
+  color: #000;
+  background: var(--accent);
+  box-shadow: 0 4px 15px rgba(232, 255, 71, 0.2);
+}
+
+.tab-navigation-btn.active .tab-icon {
+  filter: brightness(0);
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Layout Adjustments */
+.section-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+/* Premium Modal Layout */
+.modal-content.pkg-modal-premium {
+  max-width: 600px !important;
+  background: linear-gradient(135deg, rgba(22, 22, 26, 0.95) 0%, rgba(14, 14, 17, 0.98) 100%) !important;
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 100px rgba(232, 255, 71, 0.03) !important;
+  border-radius: 24px !important;
+  padding: 32px !important;
+  animation: modalScaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header-premium {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.modal-header-premium h2 {
   font-family: var(--font-display);
   font-size: 1.8rem;
-  background: linear-gradient(to right, #fff, var(--text-2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 8px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
 }
 
-.modal-sub {
+.modal-header-premium .modal-sub {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.close-modal-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 28px;
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.course-selection-list {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.close-modal-btn:hover {
+  background: rgba(232, 255, 71, 0.1);
+  color: var(--accent);
+  transform: rotate(90deg);
+}
+
+/* Premium Form Elements */
+.premium-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group-premium {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label-premium {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.label-premium .required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.input-premium,
+.textarea-premium {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  max-height: 250px;
+  padding: 12px 16px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  font-family: inherit;
+}
+
+.input-premium:focus,
+.textarea-premium:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 3px rgba(232, 255, 71, 0.15);
+}
+
+/* Course Selection list scroll */
+.course-selection-list-premium {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  max-height: 220px;
   overflow-y: auto;
-  padding: 12px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.course-selection-list::-webkit-scrollbar {
+.course-selection-list-premium::-webkit-scrollbar {
   width: 6px;
 }
-.course-selection-list::-webkit-scrollbar-thumb {
+.course-selection-list-premium::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
 
-.course-checkbox {
+/* Custom Checkbox Design */
+.course-checkbox-premium {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;
+  background: transparent;
 }
 
-.course-checkbox:hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.08);
+.course-checkbox-premium:hover {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.04);
 }
 
-.course-checkbox:has(input:checked) {
-  background: rgba(232, 255, 71, 0.08);
-  border-color: rgba(232, 255, 71, 0.2);
+.checkbox-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
 }
 
-.course-checkbox input[type="checkbox"] {
+.checkbox-wrapper input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.custom-checkbox {
   width: 20px;
   height: 20px;
-  accent-color: var(--accent);
-  cursor: pointer;
-  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background: rgba(0, 0, 0, 0.2);
 }
 
-.course-checkbox span {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.9);
+.custom-checkbox svg {
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46);
+  color: #000;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked ~ .custom-checkbox {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(232, 255, 71, 0.3);
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked ~ .custom-checkbox svg {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* checked row styling */
+.course-checkbox-premium:has(input[type="checkbox"]:checked) {
+  background: rgba(232, 255, 71, 0.06);
+  border-color: rgba(232, 255, 71, 0.15);
+}
+
+.course-chk-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.course-chk-title {
+  color: #fff;
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
-.empty-msg {
+.course-chk-duration {
+  font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.4);
-  text-align: center;
-  padding: 24px;
-  font-style: italic;
 }
+
+.empty-msg-premium {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+  padding: 32px 16px;
+}
+
+/* Modal Action Buttons */
+.modal-actions-premium {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.btn-cancel-premium {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel-premium:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.btn-submit-premium {
+  background: var(--accent);
+  border: none;
+  color: #000;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px rgba(232, 255, 71, 0.25);
+}
+
+.btn-submit-premium:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(232, 255, 71, 0.4);
+}
+
+.btn-submit-premium:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 

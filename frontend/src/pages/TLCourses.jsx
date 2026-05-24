@@ -36,6 +36,7 @@ const CoursesPage = () => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("courses"); // "courses" or "packages"
 
   // Package Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,6 +100,21 @@ const CoursesPage = () => {
       <div className="page-enter">
         {error && <p className="error-banner">{error}</p>}
 
+        <div className="courses-tab-navigation">
+          <button 
+            className={`tab-navigation-btn ${activeTab === "courses" ? "active" : ""}`}
+            onClick={() => setActiveTab("courses")}
+          >
+            <span className="tab-icon">📚</span> Tous les cours
+          </button>
+          <button 
+            className={`tab-navigation-btn ${activeTab === "packages" ? "active" : ""}`}
+            onClick={() => setActiveTab("packages")}
+          >
+            <span className="tab-icon">🗂️</span> Packages de cours
+          </button>
+        </div>
+
         {loading ? (
           <div className="spinner-wrap">
             <div className="spinner" />
@@ -107,106 +123,149 @@ const CoursesPage = () => {
           <div className="tl-courses-layout">
             
             {/* SECTION 1: COURSES */}
-            <section className="courses-section">
-              <h2 className="section-title">Mes Cours Individuels</h2>
-              <div className="courses-grid">
-                <AddCourseCard />
-                {courses.map((course, i) => (
-                  <TLCourseCard key={course.id} course={course} style={{ animationDelay: `${i * 50}ms` }} />
-                ))}
-              </div>
-            </section>
-
-            <hr className="section-divider" />
+            {activeTab === "courses" && (
+              <section className="courses-section fade-in">
+                <div className="section-header-inline">
+                  <div>
+                    <h2 className="section-title">Mes Cours Individuels</h2>
+                    <p className="section-subtitle">Gérez et éditez vos cours créés.</p>
+                  </div>
+                </div>
+                <div className="courses-grid">
+                  <AddCourseCard />
+                  {courses.map((course, i) => (
+                    <TLCourseCard key={course.id} course={course} style={{ animationDelay: `${i * 50}ms` }} />
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* SECTION 2: PACKAGES */}
-            <section className="courses-section">
-              <h2 className="section-title">Mes Packages de Cours</h2>
-              <p className="section-subtitle">Regroupez plusieurs cours dans des packages pour les assigner facilement.</p>
-              
-              <div className="courses-grid">
-                {/* Add Package Card inline */}
-                <button className="add-package-card" onClick={() => setIsModalOpen(true)}>
-                  <span className="add-course-card__icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="28" height="28">
-                      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-                    </svg>
-                  </span>
-                  <span className="add-course-card__label">Nouveau Package</span>
-                </button>
-
-                {packages.map((pkg, i) => (
-                  <div key={pkg.id} className="package-card" style={{ animationDelay: `${i * 50}ms` }}>
-                    <div className="package-card__header">
-                      <h3 className="package-card__title">{pkg.name}</h3>
-                      <span className="package-badge">{pkg.courses_info?.length || 0} cours</span>
-                    </div>
-                    <p className="package-card__desc">{pkg.description || "Aucune description"}</p>
-                    <div className="package-card__courses">
-                      {pkg.courses_info?.slice(0, 3).map(c => (
-                        <div key={c.id} className="package-course-item">• {c.title}</div>
-                      ))}
-                      {pkg.courses_info?.length > 3 && (
-                        <div className="package-course-item more">+{pkg.courses_info.length - 3} autres...</div>
-                      )}
-                    </div>
+            {activeTab === "packages" && (
+              <section className="courses-section fade-in">
+                <div className="section-header-inline">
+                  <div>
+                    <h2 className="section-title">Mes Packages de Cours</h2>
+                    <p className="section-subtitle">Regroupez plusieurs cours pour les assigner plus facilement à vos groupes.</p>
                   </div>
-                ))}
-              </div>
-            </section>
+                </div>
+                
+                <div className="courses-grid">
+                  {/* Add Package Card inline */}
+                  <button className="add-package-card" onClick={() => setIsModalOpen(true)}>
+                    <span className="add-course-card__icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="28" height="28">
+                        <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    <span className="add-course-card__label">Nouveau Package</span>
+                  </button>
+
+                  {packages.map((pkg, i) => (
+                    <div key={pkg.id} className="package-card" style={{ animationDelay: `${i * 50}ms` }}>
+                      <div className="package-card__header">
+                        <h3 className="package-card__title">{pkg.name}</h3>
+                        <span className="package-badge">{pkg.courses_info?.length || 0} cours</span>
+                      </div>
+                      <p className="package-card__desc">{pkg.description || "Aucune description renseignée."}</p>
+                      <div className="package-card__courses">
+                        {pkg.courses_info?.slice(0, 3).map(c => (
+                          <div key={c.id} className="package-course-item">{c.title}</div>
+                        ))}
+                        {pkg.courses_info?.length > 3 && (
+                          <div className="package-course-item more">+{pkg.courses_info.length - 3} autres cours...</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
 
         {/* PACKAGE CREATION MODAL */}
         {isModalOpen && (
           <div className="modal-overlay">
-            <div className="modal-content pkg-modal">
-              <h2>Créer un Package de Cours</h2>
-              <p className="modal-sub">Sélectionnez les cours à inclure dans ce package.</p>
+            <div className="modal-content pkg-modal-premium">
+              <div className="modal-header-premium">
+                <div>
+                  <h2>Créer un nouveau package</h2>
+                  <p className="modal-sub">Rassemblez plusieurs cours sous un même ensemble cohérent.</p>
+                </div>
+                <button className="close-modal-btn" onClick={() => setIsModalOpen(false)} aria-label="Fermer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
+                    <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
               
-              <form onSubmit={handleCreatePackage}>
-                <div className="form-group">
-                  <label>Nom du package *</label>
+              <form onSubmit={handleCreatePackage} className="premium-form">
+                <div className="form-group-premium">
+                  <label className="label-premium">Nom du package <span className="required">*</span></label>
                   <input 
                     type="text" 
                     value={pkgName} 
                     onChange={e => setPkgName(e.target.value)} 
                     required 
-                    placeholder="Ex: Formation Réseaux..."
+                    className="input-premium"
+                    placeholder="Ex: Parcours d'Intégration Dev..."
                   />
                 </div>
                 
-                <div className="form-group">
-                  <label>Description</label>
+                <div className="form-group-premium">
+                  <label className="label-premium">Description générale</label>
                   <textarea 
                     value={pkgDesc} 
                     onChange={e => setPkgDesc(e.target.value)} 
                     rows="3"
-                    placeholder="Description optionnelle..."
+                    className="textarea-premium"
+                    placeholder="Décrivez l'objectif de ce regroupement de cours..."
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Sélectionner les cours</label>
-                  <div className="course-selection-list">
+                <div className="form-group-premium">
+                  <label className="label-premium">Cours à inclure dans ce package</label>
+                  <div className="course-selection-list-premium">
                     {courses.map(course => (
-                      <label key={course.id} className="course-checkbox">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedCourses.includes(course.id)}
-                          onChange={() => toggleCourseSelection(course.id)}
-                        />
-                        <span>{course.title}</span>
+                      <label key={course.id} className="course-checkbox-premium">
+                        <div className="checkbox-wrapper">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedCourses.includes(course.id)}
+                            onChange={() => toggleCourseSelection(course.id)}
+                            id={`course-chk-${course.id}`}
+                          />
+                          <div className="custom-checkbox">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" width="12" height="12">
+                              <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="course-chk-label">
+                          <span className="course-chk-title">{course.title}</span>
+                          {course.duration && <span className="course-chk-duration">⏱️ {course.duration}</span>}
+                        </div>
                       </label>
                     ))}
-                    {courses.length === 0 && <p className="empty-msg">Aucun cours disponible.</p>}
+                    {courses.length === 0 && (
+                      <div className="empty-msg-premium">
+                        <p>Aucun cours n'a été créé pour le moment.</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="modal-actions">
-                  <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Annuler</button>
-                  <button type="submit" className="btn btn-primary" disabled={saving || !pkgName.trim()}>
-                    {saving ? "Création..." : "Créer le Package"}
+                <div className="modal-actions-premium">
+                  <button type="button" className="btn-cancel-premium" onClick={() => setIsModalOpen(false)}>
+                    Annuler
+                  </button>
+                  <button type="submit" className="btn-submit-premium" disabled={saving || !pkgName.trim()}>
+                    {saving ? (
+                      <span className="loading-dots">Création en cours</span>
+                    ) : (
+                      <>Créer le Package</>
+                    )}
                   </button>
                 </div>
               </form>
@@ -219,4 +278,3 @@ const CoursesPage = () => {
 };
 
 export default CoursesPage;
-
