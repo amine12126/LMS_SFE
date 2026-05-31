@@ -20,7 +20,7 @@ export default function NavbarAdmin() {
             <img className="brandLogo" src="/cap.png" alt="Logo" />
           </div>
           <div className="brandText">
-            <h2 className="brandTitle">LMS Platform</h2>
+            <h2 className="brandTitle">Manufacturing Academie</h2>
             <div className="brandSubtitle">Administration</div>
           </div>
         </div>

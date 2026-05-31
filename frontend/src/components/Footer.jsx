@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-section">
-          <h3 className="footer-logo">LMS Platform</h3>
+          <h3 className="footer-logo">Manufacturing Academie</h3>
           <p>La solution complète pour la gestion de la formation et le suivi des compétences.</p>
         </div>
         <div className="footer-section">
