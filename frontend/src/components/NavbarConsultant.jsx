@@ -38,6 +38,9 @@ export default function NavbarConsultant() {
           <NavLink to="/consultant/statistique" className={({ isActive }) => `navLink ${isActive ? "navLinkActive" : ""}`}>
             Statistique
           </NavLink>
+          <NavLink to="/consultant/help" className={({ isActive }) => `navLink ${isActive ? "navLinkActive" : ""}`}>
+            ❓ Aide
+          </NavLink>
         </div>
 
         <div className="actions" style={{ display: "flex", alignItems: "center", gap: "16px" }}>

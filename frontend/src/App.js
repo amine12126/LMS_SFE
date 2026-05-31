@@ -14,6 +14,7 @@ import ConsultantGroupe from "./pages/ConsultantGroupe.jsx";
 import ConsultantStatistique from "./pages/ConsultantStatistique.jsx";
 import ConsultantProfile from "./pages/ConsultantProfile.jsx";
 import ConsultantDashboard from "./pages/ConsultantDashboard.jsx";
+import ConsultantHelp from "./pages/ConsultantHelp.jsx";
 import ProfileTL from "./pages/ProfileTL.jsx";
 import TLCourses from "./pages/TLCourses.jsx";
 import TLGroups from "./pages/TLGroups.jsx";
@@ -76,6 +77,7 @@ function App() {
             <Route path="groupe" element={<ConsultantGroupe />} />
             <Route path="statistique" element={<ConsultantStatistique />} />
             <Route path="profile" element={<ConsultantProfile />} />
+            <Route path="help" element={<ConsultantHelp />} />
           </Route>
           <Route path="/tl/profile" element={<PrivateRoute role="tl"><ProfileTL /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
