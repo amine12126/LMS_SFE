@@ -57,11 +57,15 @@ ProjetSFE/
 │   │   ├── serializers.py      # Traduction des objets Python/Modèles en JSON
 │   │   ├── permissions.py      # Classes de restriction d'accès (IsTL, IsConsultant...)
 │   │   └── urls.py             # Routes d'authentification (/api/auth/...)
-│   └── courses/                # Module de gestion des formations et du suivi
-│       ├── models.py           # Modèles Course, Chapter, Content, Group, Progress, Package
-│       ├── views.py            # API de gestion des cours, chapitres, exclusions et stats
-│       ├── serializers.py      # Serializers des cours, chapitres, contenus et statistiques
-│       └── urls.py             # Routes d'apprentissage (/api/courses/...)
+│   ├── courses/                # Module de gestion des formations et du suivi
+│   │   ├── models.py           # Modèles Course, Chapter, Content, Group, Progress, Package
+│   │   ├── views.py            # API de gestion des cours, chapitres, exclusions et stats
+│   │   ├── serializers.py      # Serializers des cours, chapitres, contenus et statistiques
+│   │   └── urls.py             # Routes d'apprentissage (/api/courses/...)
+│   └── users/                  # Module de gestion des profils et annuaire utilisateur
+│       ├── views.py            # API de profil, changement de mot de passe et CRUD Admin
+│       ├── serializers.py      # Serializers pour les profils et listes d'utilisateurs
+│       └── urls.py             # Routes d'administration (/api/users/...)
 └── media/                      # Fichiers téléversés par les utilisateurs (PDF, vidéos, images)
 ```
 
