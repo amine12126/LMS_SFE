@@ -73,26 +73,46 @@ ProjetSFE/
 ```text
 frontend/
 ├── package.json                # Fichier de dépendances Node.js et scripts de build
-├── public/                     # Fichiers statiques publics (index.html, logos)
+├── vercel.json                 # Configuration de redirection Vercel pour Single Page App (SPA)
+├── public/                     # Fichiers statiques publics (index.html, logos, images)
 └── src/                        # Code source React principal
-    ├── App.js                  # Routage et point d'entrée de l'application cliente
-    ├── index.js                # Rendu de l'arbre DOM React
-    ├── api/                    # Configuration du client HTTP Axios
+    ├── App.js                  # Routage centralisé de toutes les pages de la plateforme
+    ├── index.js                # Point d'entrée React et rendu du DOM
+    ├── api/                    # Configuration du client API
     │   └── axios.js            # Instance Axios avec injecteur automatique de token JWT Bearer
-    ├── auth/                   # Contextes et hooks de sécurité utilisateur
-    │   ├── AuthContext.js      # Gestion globale de l'état connecté/déconnecté
-    │   └── PrivateRoute.js     # Routeur de garde protégeant les pages selon le rôle
-    ├── components/             # Composants d'interface utilisateur partagés (Navbar, Layouts)
-    └── pages/                  # Pages principales de l'application
-        ├── AuthPage.jsx        # Écran de connexion et d'inscription
-        ├── ConsultantDashboard.jsx # Accueil et résumé du parcours apprenant
-        ├── CoursesPage.jsx     # Catalogue de formation public
-        ├── ConsultantGroupe.jsx # Accès aux groupes privés et packages assignés
-        ├── ConsultantStatistique.jsx # Graphiques et analyses personnelles de progression
-        ├── ConsultantHelp.jsx  # Centre d'aide et de documentation utilisateur
-        ├── ConsultantProfile.jsx # Informations et enregistrement biométrique
-        ├── TLDashboard.jsx     # Vue superviseur (statistiques globales et gestion)
-        └── TLCourses.jsx       # Création et organisation des formations par le Team Leader
+    ├── auth/                   # Sécurisation et gestion de session
+    │   ├── AuthContext.js      # Espace d'état connecté global (login, logout, stockages)
+    │   └── PrivateRoute.js     # Middleware React de garde de route basé sur les rôles
+    ├── components/             # Composants partagés (Menus de navigation, Layouts structurels)
+    └── pages/                  # Ecrans et vues de l'application classés par espaces
+        ├── AuthPage.jsx        # Authentification unique (Formulaire de connexion/inscription)
+        ├── ResetPassword.jsx   # Formulaire sécurisé de réinitialisation du mot de passe
+        │
+        ├── 👤 Espace Consultant (Apprenant)
+        │   ├── ConsultantDashboard.jsx   # Synthèse de formation, indicateurs clés et cours obligatoires
+        │   ├── CoursesPage.jsx           # Catalogue public des formations actives
+        │   ├── CourseDetailPage.jsx       # Vue détaillée d'un cours (chapitres, contenus, médias)
+        │   ├── ConsultantGroupe.jsx       # Accès aux groupes confidentiels et packages attitrés
+        │   ├── ConsultantStatistique.jsx  # Graphiques de complétion et rapports de progrès
+        │   ├── ConsultantProfile.jsx      # Profil personnel et scanner d'enregistrement Face ID
+        │   └── ConsultantHelp.jsx         # Centre d'aide utilisateur complet et FAQ interactives
+        │
+        ├── 👑 Espace Team Leader (Superviseur)
+        │   ├── TLDashboard.jsx           # Tableau de bord global, KPI de suivi et indicateurs
+        │   ├── TLCourses.jsx             # Gestionnaire et catalogue de création des cours
+        │   ├── CreateCourse.jsx          # Editeur et formulaire de création de cours
+        │   ├── CourseDetail.jsx          # Édition avancée des chapitres et téléversement de médias
+        │   ├── TLGroups.jsx              # Interface de gestion et affectation des groupes
+        │   ├── TLStats.jsx               # Matrice statistique complète de progression des consultants
+        │   ├── ProfileTL.jsx             # Informations du profil du superviseur
+        │   └── TLPackageDetail.jsx       # Gestion et customisation des exclusions des packages
+        │
+        └── 🛠️ Espace Administrateur (Gestionnaire Système)
+            ├── AdminHome.jsx             # Dashboard d'administration global
+            ├── AdminUsers.jsx            # Gestion des comptes (Création, Modification, suppression des TL/Consultants)
+            ├── AdminGroups.jsx           # Gestion et supervision de tous les groupes
+            ├── AdminStats.jsx            # KPI globales de santé de la plateforme et audits
+            └── AdminProfile.jsx          # Profil de l'administrateur
 ```
 
 ---
